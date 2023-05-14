@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "ds-customer-api-prod"
+s3_bucket = "ds-customer-api-prod"
+s3_prefix = "ds-customer-api-prod"
+region = "ap-southeast-2"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "AWSENV=\"prod\""
+image_repositories = []

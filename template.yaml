@@ -1,0 +1,436 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: DigitalSpider Customer Serverless APIs and Lambdas
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Runtime: nodejs16.x
+    Architectures:
+      - x86_64
+    MemorySize: 256
+    Timeout: 90
+    VpcConfig:
+      SubnetIds:
+        - Fn::Sub: "{{resolve:secretsmanager:customer-secrets-${AWSENV}:SecretString:subnet1}}"
+        - Fn::Sub: "{{resolve:secretsmanager:customer-secrets-${AWSENV}:SecretString:subnet2}}"
+        - Fn::Sub: "{{resolve:secretsmanager:customer-secrets-${AWSENV}:SecretString:subnet3}}"
+        # Fn::Split:
+        #   - ','
+        #   - Fn::ImportValue:
+        #       Fn::Sub: ds-infra-network-subnetids-${AWSENV}
+      SecurityGroupIds:
+        - Ref: CustomerSG
+
+Parameters:
+  AWSENV:
+    Type: String
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+      - local
+    Default: local
+  StageName:
+    Type: String
+    AllowedPattern: '[a-z0-9]+'
+    Default: v1
+
+Conditions:
+  isDev:
+    Fn::Equals:
+      - Ref: AWSENV
+      - dev
+  isStaging:
+    Fn::Equals:
+      - Ref: AWSENV
+      - staging
+  isProd:
+    Fn::Equals:
+      - Ref: AWSENV
+      - prod
+
+# Mappings docs: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html
+Mappings:
+  ReferenceMap:
+    prod:
+      CertificateARN: arn:aws:acm:ap-southeast-2:487950220135:certificate/e726795b-fa86-4eb7-bf68-c7cb999acc4b
+      CorsAllowUrl: "'https://customer-api.digitalspider.com.au'"
+    staging:
+      CertificateARN: arn:aws:acm:ap-southeast-2:839369397293:certificate/0cbe19a4-2ced-4dd4-b85f-06c891996f4b
+      CorsAllowUrl: "'https://customer-api.staging.digitalspider.com.au'"
+    dev:
+      CertificateARN: arn:aws:acm:ap-southeast-2:839369397293:certificate/b0d0252a-4a6f-44ac-b56e-92bd96bbd471
+      CorsAllowUrl: "'https://customer-api.dev.digitalspider.com.au'"
+    local:
+      CertificateARN: arn:aws:acm:ap-southeast-2:839369397293:certificate/b0d0252a-4a6f-44ac-b56e-92bd96bbd471
+      CorsAllowUrl: "'*'"
+
+Resources:
+  #BEGIN: Security group
+  CustomerSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Customer APIs SG
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      VpcId:
+        Fn::ImportValue:
+          Fn::Sub: ds-infra-network-vpcid-${AWSENV}
+  #END: Security group
+
+  #BEGIN: Api Gateway
+  CustomerAccessLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /logs/customer/api-access-logs-${AWSENV}
+      RetentionInDays: 30
+    # AWS::Logs::LogGroup does not support Tags
+
+  CustomerApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name:
+        Fn::Sub: customer-api-${AWSENV}
+      Description: Customer API Gateway
+      EndpointConfiguration:
+        Type: REGIONAL
+      TracingEnabled: true
+      StageName:
+        Ref: StageName
+      Cors:
+        AllowMethods: "'POST, GET, PUT'"
+        AllowHeaders: "'X-Forwarded-For,Content-Type,Authorization,X-Amz-Date,X-Amz-Security-Token,AccessToken'"
+        AllowOrigin:
+          Fn::FindInMap: [ReferenceMap, Ref: AWSENV, CorsAllowUrl]
+        MaxAge: "'600'"
+        AllowCredentials: true
+      Auth:
+        AddDefaultAuthorizerToCorsPreflight: False # CORS: removes Authorizer from the automatically created OPTIONS methods
+        DefaultAuthorizer: LambdaRequestAuthorizer
+        Authorizers:
+          LambdaRequestAuthorizer:
+            FunctionArn:
+              Fn::GetAtt: LambdaRequestAuthorizer.Arn
+      MethodSettings:
+        - ResourcePath: /* # allows for logging on any resource
+          HttpMethod: '*' # allows for logging on any method
+          LoggingLevel: ERROR
+          MetricsEnabled: true # Requires setup
+          DataTraceEnabled: true
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: customer.openapi.yaml
+      Domain:
+        BasePath:
+          - /v1
+        CertificateArn:
+          Fn::FindInMap: [ReferenceMap, Ref: AWSENV, CertificateARN]
+        DomainName:
+          Fn::If: [isProd, customer-api.digitalspider.com.au, Fn::Sub: 'customer-api.${AWSENV}.digitalspider.com.au']
+        EndpointConfiguration: REGIONAL
+        Route53:
+          HostedZoneName:
+            Fn::If: [isProd, digitalspider.com.au., Fn::Sub: '${AWSENV}.digitalspider.com.au.']
+      AccessLogSetting:
+        DestinationArn:
+          Fn::GetAtt: CustomerAccessLogs.Arn
+        Format: requestId:$context.requestId,APIId:$context.apiId,PrincipalId:$context.authorizer.principalId,XRayId:$context.xrayTraceId,SourceIp:$context.identity.sourceIp,Protocol:$context.protocol,HttpMethod:$context.httpMethod,DomainName:$context.domainName,Stage:$context.stage,RequestPath:$context.path,ResourcePath:$context.resourcePath,RequestTime:$context.requestTime,ResponseLatency:$context.responseLatency,ResponseStatus:$context.status,Validation:$context.error.validationErrorString,WAFLatency:$context.waf.latency,AuthenticateLatency:$context.authenticate.latency,AuthorizerLatency:$context.authorizer.latency,AuthorizeLatency:$context.authorize.latency,IntegrationLatency:$context.integration.latency
+      Tags:
+        Name: Customer API Gateway
+        Description: Customer API Gateway
+  #END: Api Gateway
+
+  #BEGIN: IAM Role
+  CustomerLambdaIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName:
+            Fn::Sub: customer-CloudWatchAccess-${AWSENV}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/*
+        - PolicyName:
+            Fn::Sub: customer-SecretsManager-${AWSENV}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:secrets-${AWSENV}*
+        - PolicyName:
+            Fn::Sub: customer-DynamoDBItemAccess-${AWSENV}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource:
+                  - Fn::GetAtt: CustomerTable.Arn
+                  - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/customers-${AWSENV}/index/*
+  #END: IAM Role
+
+  #BEGIN: Secrets
+  CustomerSecrets:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Description: Secrets for customer
+      Name:
+        Fn::Sub: secrets-${AWSENV}
+  #END: Secrets
+
+  #BEGIN: DynamoDB tables
+  CustomerTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: customers-${AWSENV}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: tenantId
+          AttributeType: S
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: tenantId
+          KeyType: HASH
+        - AttributeName: id
+          KeyType: RANGE
+  #END: DynamoDB tables
+
+  #BEGIN: Lambda Functions
+  LambdaRequestAuthorizer:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      Description: Lambda API Authorizer
+      FunctionName:
+        Fn::Sub: auth-api-authorizor-${AWSENV}
+      Role:
+        Fn::GetAtt: AuthLambdaIAMRole.Arn
+      CodeUri: src/authorizer/
+      Handler: authorize.handleEvent
+      Tracing: Active
+      Layers:
+        - Ref: RuntimeDependenciesLayer
+      Environment:
+        Variables:
+          AWSENV:
+            Fn::Sub: ${AWSENV}
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+          - authorize.ts
+
+  AuthApiFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      Description: Auth API Lambda
+      FunctionName:
+        Fn::Sub: auth-api-${AWSENV}
+      Role:
+        Fn::GetAtt: AuthLambdaIAMRole.Arn
+      CodeUri: src/handlers/
+      Handler: authHandler.handleEvent
+      Tracing: Active
+      Layers:
+        - Ref: RuntimeDependenciesLayer
+      Environment:
+        Variables:
+          AWSENV:
+            Fn::Sub: ${AWSENV}
+      Events:
+        Login:
+          Type: Api
+          Properties:
+            Path: /auth/login
+            Method: post
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        SignUp:
+          Type: Api
+          Properties:
+            Path: /auth/signup
+            Method: post
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        VerifyJWT:
+          Type: Api
+          Properties:
+            Path: /auth/verify
+            Method: get
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+          - authHandler.ts
+
+  CustomerApiFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      Description: Customer API Lambda
+      FunctionName:
+        Fn::Sub: customer-api-${AWSENV}
+      Role:
+        Fn::GetAtt: CustomerLambdaIAMRole.Arn
+      CodeUri: src/handlers/
+      Handler: appHandler.handleEvent
+      Tracing: Active
+      Layers:
+        - Ref: RuntimeDependenciesLayer
+      Environment:
+        Variables:
+          AWSENV:
+            Fn::Sub: ${AWSENV}
+      Events:
+        CreateCustomer:
+          Type: Api
+          Properties:
+            Path: /customer
+            Method: post
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        ListCustomers:
+          Type: Api
+          Properties:
+            Path: /customer
+            Method: get
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        GetCustomer:
+          Type: Api
+          Properties:
+            Path: /customer/{uuid}
+            Method: get
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        UpdateCustomer:
+          Type: Api
+          Properties:
+            Path: /customer/{uuid}
+            Method: put
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        DeleteCustomer:
+          Type: Api
+          Properties:
+            Path: /customer/{uuid}
+            Method: delete
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+          - appHandler.ts
+  #END: Lambda Functions
+
+  #BEGIN: Lambda Layers
+  RuntimeDependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      LayerName:
+        Fn::Sub: customer-dependencies-${AWSENV}
+      Description: Runtime dependencies for Lambdas
+      ContentUri: ./
+      CompatibleRuntimes:
+        - nodejs16.x
+      RetentionPolicy: Delete
+  #END: Lambda Layers
+
+Outputs:
+  CustomerApi:
+    Description: URL of the API endpoint
+    Value:
+      Fn::Sub: https://${CustomerApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/
+    Export:
+      Name:
+        Fn::Sub: customer-api-url-${AWSENV}
+  CustomerApiId:
+    Description: Api id of CustomerApi
+    Value:
+      Ref: CustomerApi
+    Export:
+      Name:
+        Fn::Sub: customer-api-id-${AWSENV}
+  CustomerTable:
+    Description: Arn of DynamoDB table CustomerTable
+    Value:
+      Fn::GetAtt: CustomerTable.Arn
+    Export:
+      Name:
+        Fn::Sub: customer-dynamo-table-${AWSENV}
+  CustomerApiFunctionArn:
+    Description: Customer Lambda Api Function ARN
+    Value:
+      Fn::GetAtt: CustomerApiFunction.Arn
+    Export:
+      Name:
+        Fn::Sub: customer-api-lambda-arn-${AWSENV}

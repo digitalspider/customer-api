@@ -1,0 +1,41 @@
+name: CI Deploy STAGING
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  server:
+    name: Deploy Server APIs
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+
+      - name: Install-Test
+        run: |
+          yarn install --frozen-lockfile
+          yarn test
+
+      - name: Install SAM
+        uses: aws-actions/setup-sam@v2
+
+      - name: Build
+        run: yarn build
+
+      - name: Deploy Stack
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_ROLE: CIDeployAccess
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID_NONPROD }}
+          AWS_BUCKET_NAME: ds-customer-staging
+          AWSENV: staging
+        run: |
+          .deploy/aws-sam-deploy.sh samconfig-staging.toml

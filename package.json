@@ -1,0 +1,68 @@
+{
+  "name": "ds-customer-api",
+  "version": "1.0.0",
+  "description": "Digital Spider Customer APIs",
+  "main": "index.js",
+  "scripts": {
+    "build": "sam build --beta-features",
+    "clean": "node_modules/.bin/rimraf .aws-sam .vscode",
+    "prebuild": "node_modules/.bin/rimraf .aws-sam .vscode",
+    "prewatch": "node_modules/.bin/rimraf .aws-sam .vscode",
+    "lint": "eslint . --ext .js,.ts --format=pretty",
+    "lint:quiet": "yarn lint --quiet",
+    "lint:fix": "yarn lint --quiet --fix",
+    "validate": "yarn lint:quiet && yarn test",
+    "test": "yarn jest",
+    "start:api": "sam local start-api --log-file logs-api.log --env-vars env.json",
+    "start": "yarn build --cached && yarn start:api"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.8",
+    "@babel/plugin-transform-modules-commonjs": "^7.21.5",
+    "@babel/preset-typescript": "^7.21.5",
+    "@types/aws-lambda": "^8.10.115",
+    "@types/axios": "^0.14.0",
+    "@types/jest": "^29.5.1",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/node": "^20.1.3",
+    "@types/uuid": "^9.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.5",
+    "@typescript-eslint/parser": "^5.59.5",
+    "esbuild": "^0.17.19",
+    "esbuild-jest": "^0.5.0",
+    "eslint": "^8.40.0",
+    "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-formatter-pretty": "^5.0.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jest": "^27.2.1",
+    "eslint-plugin-prettier": "^4.2.1",
+    "jest": "^29.5.0",
+    "newman": "^5.3.2",
+    "prettier": "^2.8.8",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.332.0",
+    "@aws-sdk/client-s3": "^3.332.0",
+    "@aws-sdk/client-secrets-manager": "^3.332.0",
+    "@aws-sdk/lib-dynamodb": "^3.332.0",
+    "aws-lambda": "^1.0.7",
+    "axios": "^1.4.0",
+    "jsonwebtoken": "^9.0.0",
+    "uuid": "^9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/digitalspider/lambda-function-url.git"
+  },
+  "author": "digitalspider",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/digitalspider/lambda-function-url/issues"
+  },
+  "homepage": "https://github.com/digitalspider/lambda-function-url#readme"
+}

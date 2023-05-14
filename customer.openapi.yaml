@@ -1,0 +1,425 @@
+openapi: 3.0.3
+info:
+  version: '1.0'
+  title: Customers API
+  description: Digital Spider Customers APIs
+tags:
+  - name: Auth
+  - name: Customer
+
+# AWS Validators
+x-amazon-apigateway-request-validators:
+  all:
+    validateRequestBody: true
+    validateRequestParameters: true
+  params-only:
+    validateRequestBody: false
+    validateRequestParameters: true
+x-amazon-apigateway-request-validator: params-only # Default
+
+servers:
+  - url: https://customer-api.dev.digitalspider.com.au/v1
+    description: Develop server (uses test data)
+  - url: http://localhost:3000
+    description: Localhost server (uses test data)
+  - url: https://customer-api.staging.digitalspider.com.au/v1
+    description: Staging server (uses test data)
+  - url: https://customer-api.digitalspider.com.au/v1
+    description: Production server (uses live data)
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      operationId: Login
+      description: Login to get a JWT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/loginInput'
+      responses:
+        200:
+          description: success
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
+  /auth/signup:
+    post:
+      tags:
+        - Auth
+      operationId: SignUp
+      description: SignUp to create a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/signUpInput'
+      responses:
+        200:
+          description: success
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
+  /auth/verify:
+    get:
+      tags:
+        - Auth
+      operationId: VerifyJWT
+      description: Verify the JWT by passing the Authorization header, with a Bearer token
+      responses:
+        200:
+          description: success
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+        401:
+          description: The request authorization is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorUnauthorized'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
+
+  /customer:
+    post:
+      tags:
+        - Customer
+      operationId: CreateCustomer
+      description: Creates a new customer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customerCreate'
+      responses:
+        200:
+          description: success
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    get:
+      tags:
+        - Customer
+      operationId: ListCustomers
+      description: Provide a searchable list of customers
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/customer'
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+        401:
+          description: The request authorization is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorUnauthorized'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+  /customer/{uuid}:
+    parameters:
+      - in: path
+        name: uuid
+        description: The id of the customer
+        schema:
+          $ref: '#/components/schemas/customerId'
+        required: true
+    get:
+      tags:
+        - Customer
+      operationId: GetCustomer
+      description: Get details of the customer
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/customer'
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+        401:
+          description: The request authorization is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorUnauthorized'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    put:
+      tags:
+        - Customer
+      operationId: UpdateCustomer
+      description: Update an existing customer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customerCreate'
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/customer'
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+        401:
+          description: The request authorization is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorUnauthorized'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    delete:
+      tags:
+        - Customer
+      operationId: DeteteCustomer
+      description: Delete an existing customer
+      responses:
+        200:
+          description: success
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+        401:
+          description: The request authorization is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorUnauthorized'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+
+security:
+  - jwtBearerAuth: []
+
+components:
+  securitySchemes:
+    jwtBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    commonErrorData:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error message
+        code:
+          type: string
+          description: The error code
+          example: ERR_00002
+        level:
+          type: string
+          description: The error level
+          example: Error
+        timestamp:
+          type: string
+          format: date-time
+          description: The timestamp that the error occurred
+        details:
+          type: string
+          description: Optional additional error details
+          nullable: true
+      required:
+        - message
+        - timestamp
+    commonErrorUnauthorized:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error message
+          example: Unauthorized
+      required:
+        - message
+
+    username:
+      type: string
+      description: The username logging in, usually an email address
+      example: "{{username}}"
+    password:
+      type: string
+      description: The password for the user
+      example: "{{password}}"
+    customerId:
+      type: string
+      description: An identifier for an external facing entity.\nThis field is generated and cannot be set or edited. Used for lookups, updates, and deletes
+      pattern: '^[a-zA-Z0-9-_]+$'
+      readOnly: true
+      example: "{{customerId}}"
+    tenantId:
+      type: string
+      description: A identifier of the tenancy of the customer
+      pattern: '^[a-zA-Z0-9-_]+$'
+      example: "{{tenantId}}"
+    customerType:
+      type: string
+      description: A type of customer this is, either sender or recipient
+      pattern: '^[a-zA-Z0-9-_]+$'
+      example: "recipient"
+    firstName:
+      type: string
+      description: The first name of the customer
+      example: Test
+      nullable: false
+    lastName:
+      type: string
+      description: The last name of the customer
+      example: User
+      nullable: false
+    email:
+      type: string
+      description: The email address of the customer
+      example: test.user@digitalspider.com.au
+      nullable: false
+    mobileNumber:
+      type: string
+      description: The mobile number of the customer
+      pattern: '^[0-9- ]+$'
+      example: '+61 411 222 333'
+    deviceId:
+      type: string
+      description: The unique ID of the device
+      pattern: '^[a-zA-Z0-9-_/ ]+$'
+      example: '1234'
+    deviceOs:
+      type: string
+      description: The operating system of the device
+      pattern: '^[a-zA-Z0-9-_/ ]+$'
+      example: 'Windows/XP'
+
+    loginInput:
+      type: object
+      properties:
+        username:
+          $ref: '#/components/schemas/username'
+        password:
+          $ref: '#/components/schemas/password'
+    signUpInput:
+      type: object
+      properties:
+        username:
+          $ref: '#/components/schemas/username'
+        password:
+          $ref: '#/components/schemas/password'
+        tenantId:
+          $ref: '#/components/schemas/tenantId'
+
+    customer:
+      type: object
+      required:
+        - tenantId
+        - id
+      properties:
+        tenantId:
+          $ref: '#/components/schemas/tenantId'
+        id:
+          $ref: '#/components/schemas/customerId'
+        type:
+          $ref: '#/components/schemas/customerType'
+        firstName:
+          $ref: '#/components/schemas/firstName'
+        lastName:
+          $ref: '#/components/schemas/lastName'
+        email:
+          $ref: '#/components/schemas/email'
+        mobileNumber:
+          $ref: '#/components/schemas/mobileNumber'
+        deviceId:
+          $ref: '#/components/schemas/deviceId'
+        deviceOs:
+          $ref: '#/components/schemas/deviceOs'
+    customerCreate:
+      type: object
+      required:
+        - email
+      properties:
+        type:
+          $ref: '#/components/schemas/customerType'
+        firstName:
+          $ref: '#/components/schemas/firstName'
+        lastName:
+          $ref: '#/components/schemas/lastName'
+        email:
+          $ref: '#/components/schemas/email'
+        mobileNumber:
+          $ref: '#/components/schemas/mobileNumber'
+        deviceId:
+          $ref: '#/components/schemas/deviceId'
+        deviceOs:
+          $ref: '#/components/schemas/deviceOs'

@@ -1,0 +1,11 @@
+.DS_Store
+.env
+env.json
+node_modules
+build
+# ignore log files
+logs
+*.log
+# ignore .ignore folder
+.ignore
+

@@ -1,0 +1,98 @@
+name: PR build
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  client:
+    name: Build Client
+    runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
+      - name: Run tests
+        # env:
+        #    CI: false # Treating warnings as errors because process.env.CI = true.
+        run: |
+          cat .npmrc.example | sed s/SECRET_GH_TOKEN/${{secrets.GH_TOKEN}}/g > .npmrc
+          yarn install --frozen-lockfile
+          yarn validate
+          yarn build
+
+  server:
+    name: Build Server
+    runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
+
+      #https://github.com/actions/cache/blob/main/examples.md#node---yarn-2
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
+      - uses: actions/cache@v3
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Run tests
+        # env:
+        #    CI: false # Treating warnings as errors because process.env.CI = true.
+        run: |
+          yarn install --frozen-lockfile
+          yarn test
+
+  dependabot-tests:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v3
+      - name: Unit tests
+        # env:
+        #    CI: false # Treating warnings as errors because process.env.CI = true.
+        run: |
+          cat .npmrc.example | sed s/SECRET_GH_TOKEN/${{secrets.GH_TOKEN}}/g > .npmrc
+          yarn install --frozen-lockfile
+          yarn validate
+          yarn build
+
+  dependabot-tests-server:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v3
+      - name: Unit tests
+        # env:
+        #    CI: false # Treating warnings as errors because process.env.CI = true.
+        run: |
+          cat .npmrc.example | sed s/SECRET_GH_TOKEN/${{secrets.GH_TOKEN}}/g > .npmrc
+          yarn install --frozen-lockfile
+          yarn test

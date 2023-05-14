@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "ds-customer-api-staging"
+s3_bucket = "ds-customer-api-staging"
+s3_prefix = "ds-customer-api-staging"
+region = "ap-southeast-2"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "AWSENV=\"staging\""
+image_repositories = []
