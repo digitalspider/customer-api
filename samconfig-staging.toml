@@ -8,5 +8,5 @@ s3_prefix = "ds-customer-api-staging"
 region = "ap-southeast-2"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "AWSENV=\"staging\""
+parameter_overrides = "AWSENV=\"staging\" DomainName=\"myfamily.social\""
 image_repositories = []

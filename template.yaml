@@ -33,8 +33,16 @@ Parameters:
     Type: String
     AllowedPattern: '[a-z0-9]+'
     Default: v1
+  DomainName:
+    Type: String
+    AllowedPattern: '[a-z0-9\.]+'
+    Default: digitalspider.com.au
 
 Conditions:
+  isLocal:
+    Fn::Equals:
+      - Ref: AWSENV
+      - local
   isDev:
     Fn::Equals:
       - Ref: AWSENV
@@ -53,16 +61,12 @@ Mappings:
   ReferenceMap:
     prod:
       CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/e726795b-fa86-4eb7-bf68-c7cb999acc4b
-      CorsAllowUrl: "'https://customer-api.digitalspider.com.au'"
     staging:
       CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b5ec5fcb-6e43-428d-bf51-fa45fe6e4f9c
-      CorsAllowUrl: "'https://customer-api.staging.digitalspider.com.au'"
     dev:
-      CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b0d0252a-4a6f-44ac-b56e-92bd96bbd471
-      CorsAllowUrl: "'https://customer-api.dev.digitalspider.com.au'"
+      CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b5ec5fcb-6e43-428d-bf51-fa45fe6e4f9c
     local:
-      CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b0d0252a-4a6f-44ac-b56e-92bd96bbd471
-      CorsAllowUrl: "'*'"
+      CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b5ec5fcb-6e43-428d-bf51-fa45fe6e4f9c
 
 Resources:
   #BEGIN: Security group
@@ -107,7 +111,7 @@ Resources:
         AllowMethods: "'POST, GET, PUT'"
         AllowHeaders: "'X-Forwarded-For,Content-Type,Authorization,X-Amz-Date,X-Amz-Security-Token,AccessToken'"
         AllowOrigin:
-          Fn::FindInMap: [ReferenceMap, Ref: AWSENV, CorsAllowUrl]
+          Fn::If: [isProd, Ref: DomainName, Fn::If: [isLocal, '*', Fn::Sub: '${AWSENV}.${DomainName}']]
         MaxAge: "'600'"
         AllowCredentials: true
       Auth:
@@ -134,11 +138,11 @@ Resources:
         CertificateArn:
           Fn::FindInMap: [ReferenceMap, Ref: AWSENV, CertificateARN]
         DomainName:
-          Fn::If: [isProd, customer-api.digitalspider.com.au, Fn::Sub: 'customer-api.${AWSENV}.digitalspider.com.au']
+          Fn::If: [isProd, Fn::Sub: 'api.${DomainName}', Fn::Sub: 'api.${AWSENV}.${DomainName}']
         EndpointConfiguration: REGIONAL
         Route53:
           HostedZoneName:
-            Fn::If: [isProd, digitalspider.com.au., Fn::Sub: '${AWSENV}.digitalspider.com.au.']
+            Fn::If: [isProd, Fn::Sub: '${DomainName}.', Fn::Sub: '${AWSENV}.${DomainName}.']
       AccessLogSetting:
         DestinationArn:
           Fn::GetAtt: CustomerAccessLogs.Arn
