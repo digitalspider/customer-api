@@ -5,7 +5,7 @@ Description: DigitalSpider Customer Serverless APIs and Lambdas
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Runtime: nodejs16.x
+    Runtime: nodejs20.x
     Architectures:
       - x86_64
     MemorySize: 256
@@ -464,7 +464,7 @@ Resources:
       Description: Runtime dependencies for Lambdas
       ContentUri: ./
       CompatibleRuntimes:
-        - nodejs16.x
+        - nodejs20.x
       RetentionPolicy: Delete
   #END: Lambda Layers
 
