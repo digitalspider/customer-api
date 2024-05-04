@@ -218,6 +218,18 @@ Resources:
   #END: Secrets
 
   #BEGIN: DynamoDB tables
+  AuthTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: auth-${AWSENV}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: username
+          AttributeType: S
+      KeySchema:
+        - AttributeName: username
+          KeyType: HASH
   CustomerTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -420,6 +432,13 @@ Outputs:
     Export:
       Name:
         Fn::Sub: customer-api-id-${AWSENV}
+  AuthTable:
+    Description: Arn of DynamoDB table AuthTable
+    Value:
+      Fn::GetAtt: AuthTable.Arn
+    Export:
+      Name:
+        Fn::Sub: auth-dynamo-table-${AWSENV}
   CustomerTable:
     Description: Arn of DynamoDB table CustomerTable
     Value:
