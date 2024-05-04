@@ -35,7 +35,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           AWS_ROLE: CIDeployAccess
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID_PROD }}
-          AWS_BUCKET_NAME: ds-customer-prod
+          AWS_BUCKET_NAME: ds-customer-api-prod
           AWSENV: prod
         run: |
           .deploy/aws-sam-deploy.sh samconfig-prod.toml

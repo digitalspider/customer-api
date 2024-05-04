@@ -37,7 +37,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           AWS_ROLE: CIDeployAccess
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID_NONPROD }}
-          AWS_BUCKET_NAME: ds-customer-dev
+          AWS_BUCKET_NAME: ds-customer-api-dev
           AWSENV: dev
         run: |
           .deploy/aws-sam-deploy.sh samconfig-dev.toml
