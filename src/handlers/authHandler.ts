@@ -1,14 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyEventHeaders, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { HttpStatusCode } from 'axios';
 import { HTTP_METHOD } from '../common/constants';
-import {
-  createJwt,
-  extractToken,
-  getItem,
-  mapAuthToToken,
-  verifyToken,
-  createItem,
-} from '../services/authService';
+import { createJwt, extractToken, getItem, mapAuthToToken, verifyToken, createItem } from '../services/authService';
 import { createResponse } from '../services/utils';
 import { Auth, LoginInput } from '../types/auth';
 import { CustomAxiosError } from '../types/error';
