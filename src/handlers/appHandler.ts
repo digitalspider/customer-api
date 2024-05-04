@@ -17,7 +17,15 @@ export async function handler(event: APIGatewayProxyEvent, context: Context): Pr
   const { id: objectId } = pathParameters || {};
   const body = bodyString ? JSON.parse(bodyString) : undefined;
   body &&
-    console.debug('request', { handler: 'appHandler', httpMethod, path, awsRequestId, tenantId, objectId, body: JSON.stringify(body) });
+    console.debug('request', {
+      handler: 'appHandler',
+      httpMethod,
+      path,
+      awsRequestId,
+      tenantId,
+      objectId,
+      body: JSON.stringify(body),
+    });
 
   try {
     let result;
@@ -42,7 +50,7 @@ export async function handler(event: APIGatewayProxyEvent, context: Context): Pr
     console.debug('response', { httpMethod, path, awsRequestId, response: JSON.stringify(result) });
     return createResponse(Ok, result);
   } catch (err) {
-    const { status, message, data, url = `${httpMethod} ${path}` } = err as CustomAxiosError || {};
+    const { status, message, data, url = `${httpMethod} ${path}` } = (err as CustomAxiosError) || {};
     const errorStatus = status || InternalServerError;
     console.error(`ERROR in API Request ${httpMethod} ${path}.`, {
       message,
@@ -75,7 +83,6 @@ export async function handleGet(tenantId: string, customerId: string): Promise<C
   const result = await getCustomer(tenantId, customerId);
   return result || {};
 }
-
 
 export async function handleCreate(tenantId: string, customer: Customer): Promise<Customer> {
   const result = await createCustomer(tenantId, customer);
