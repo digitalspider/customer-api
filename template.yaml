@@ -55,7 +55,7 @@ Mappings:
       CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/e726795b-fa86-4eb7-bf68-c7cb999acc4b
       CorsAllowUrl: "'https://customer-api.digitalspider.com.au'"
     staging:
-      CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/0cbe19a4-2ced-4dd4-b85f-06c891996f4b
+      CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b5ec5fcb-6e43-428d-bf51-fa45fe6e4f9c
       CorsAllowUrl: "'https://customer-api.staging.digitalspider.com.au'"
     dev:
       CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b0d0252a-4a6f-44ac-b56e-92bd96bbd471
