@@ -91,10 +91,9 @@ export async function count(): Promise<number> {
   }
  */
 function getFilterExpression(inputs: { [key: string]: string }) {
-  // eslint-disable-line
   const filterExpression = [];
   const ExpressionAttributeNames: { [key: string]: string } = {};
-  const ExpressionAttributeValues: { [key: string]: any } = {};
+  const ExpressionAttributeValues: { [key: string]: any } = {};  // eslint-disable-line
 
   for (const [key, value] of Object.entries(inputs)) {
     filterExpression.push(`#${key} = :${key}`);

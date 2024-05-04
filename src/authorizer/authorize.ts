@@ -5,7 +5,7 @@ import {
   PolicyDocument,
 } from 'aws-lambda';
 import { JwtPayload } from 'jsonwebtoken';
-import { extractToken, getJwtSecret, verifyToken } from '../services/authService';
+import { extractToken, verifyToken } from '../services/authService';
 
 type Effect = 'Allow' | 'Deny';
 

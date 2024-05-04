@@ -26,7 +26,7 @@ describe('Test utils', () => {
     });
   });
   it('groupSettledPromises()', async () => {
-    const func = async (input: any) => {
+    const func = async (input: any) => {  // eslint-disable-line
       return input.toString();
     };
     const promises = [];

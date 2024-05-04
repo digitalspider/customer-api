@@ -11,10 +11,9 @@ export type ResponseOptions = {
   corsOrigin?: string;
 };
 
-//eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createResponse(
   statusCode = HttpStatusCode.Ok,
-  data?: any,
+  data?: any,  // eslint-disable-line
   options?: ResponseOptions,
 ): APIGatewayProxyResult {
   const { contentType = 'application/json', corsOrigin = '*' } = options || {};
