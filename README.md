@@ -19,6 +19,13 @@ The URLs for this applications are:
 - STAGING = https://customer-api.staging.digitalspider.com.au
 - PROD = https://customer-api.digitalspider.com.au
 
+# Installation
+- Install npm
+- Install [yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)
+- Setup an AWS account
+- Add System Manager Parameter Store parameters `/staging/vpc/id` and `/staging/vpc/subnets` (comma separated)
+
+
 # Swagger OPENAPI specs
 
 You can download the Swagger OPEN API specifications here [customer.openapi.yaml](customer.openapi.yaml)

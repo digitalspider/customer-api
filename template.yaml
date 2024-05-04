@@ -12,13 +12,11 @@ Globals:
     Timeout: 90
     VpcConfig:
       SubnetIds:
-        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet1:1}}"
-        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet2:1}}"
-        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet3:1}}"
-        # Fn::Split:
-        #   - ','
-        #   - Fn::ImportValue:
-        #       Fn::Sub: ds-infra-network-subnetids-${AWSENV}
+        Fn::Split:
+          - ','
+          - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnets:1}}"
+          # - Fn::ImportValue:
+          #     Fn::Sub: ds-infra-network-subnetids-${AWSENV}
       SecurityGroupIds:
         - Ref: CustomerSG
 
