@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "sam build --beta-features",
+    "deploy:dev": "sam deploy --profile customer --no-confirm-changeset --no-fail-on-empty-changeset --config-file samconfig-dev.toml",
+    "deploy:staging": "sam deploy --profile customer --no-confirm-changeset --no-fail-on-empty-changeset --config-file samconfig-staging.toml",
+    "deploy:prod": "sam deploy --profile customer --no-confirm-changeset --no-fail-on-empty-changeset --config-file samconfig-prod.toml",
     "clean": "node_modules/.bin/rimraf .aws-sam .vscode",
     "prebuild": "node_modules/.bin/rimraf .aws-sam .vscode",
     "prewatch": "node_modules/.bin/rimraf .aws-sam .vscode",
