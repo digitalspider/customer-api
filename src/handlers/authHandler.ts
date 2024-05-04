@@ -5,7 +5,6 @@ import {
   createJwt,
   extractToken,
   getItem,
-  getJwtSecret,
   mapAuthToToken,
   verifyToken,
   createItem,
@@ -26,21 +25,20 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
 
   try {
     let data;
-    const secret = await getJwtSecret();
     switch (httpMethod) {
       case GET:
         const jwtToken = extractTokenFromHeaders(headers, 'bearer');
-        data = await verifyToken(jwtToken, secret);
+        data = await verifyToken(jwtToken);
         break;
       case POST:
         if (path.endsWith('/login')) {
           // const authData = await validateBasicAuth(event); // TODO: extra security
-          const token = await handleCreateJwt(body as LoginInput, secret);
+          const token = await handleCreateJwt(body as LoginInput);
           data = { token };
         } else if (path.endsWith('/signup')) {
           // const authData = await validateBasicAuth(event); // TODO: extra security
           const user = await createItem(body as Auth);
-          const token = await handleCreateJwt(user as LoginInput, secret);
+          const token = await handleCreateJwt(user as LoginInput);
           data = { token };
         }
         break;
@@ -66,7 +64,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
   return response;
 }
 
-async function handleCreateJwt(input: LoginInput, secret: string): Promise<string> {
+async function handleCreateJwt(input: LoginInput): Promise<string> {
   const { username: usernameInput, password: passwordInput } = input || {};
   const user = await getItem(usernameInput);
   const { username, password, tenantId, expiryInSec } = user || {};
@@ -77,7 +75,7 @@ async function handleCreateJwt(input: LoginInput, secret: string): Promise<strin
     throw new CustomAxiosError(`The user ${username} has not been configured`, { status: InternalServerError });
   }
   const payload = mapAuthToToken(user);
-  return createJwt(payload, secret, expiryInSec);
+  return createJwt(payload, undefined, expiryInSec);
 }
 
 async function validateBasicAuth(event: APIGatewayProxyEvent): Promise<Auth> {

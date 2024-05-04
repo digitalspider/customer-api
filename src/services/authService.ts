@@ -30,8 +30,9 @@ export async function getJwtSecret(): Promise<string> {
   return jwtSecret;
 }
 
-export async function createJwt(data: JwtPayload, secret: string, expiryInSec?: number): Promise<string> {
-  if (!data || !secret) return '';
+export async function createJwt(data: JwtPayload, secret?: string, expiryInSec?: number): Promise<string> {
+  if (!data) return '';
+  const jwtSecret = secret || await getJwtSecret();
   const iat = Math.floor(Date.now() / 1000) - 30; // 30 seconds ago
   const expiresIn = expiryInSec || 4 * 60 * 60; // Default is 4h
   const payload: JwtPayload = {
@@ -44,16 +45,17 @@ export async function createJwt(data: JwtPayload, secret: string, expiryInSec?: 
     algorithm: 'HS256',
     expiresIn,
   };
-  return jwt.sign(payload, secret, encryptionOptions);
+  return jwt.sign(payload, jwtSecret, encryptionOptions);
 }
 
-export async function verifyToken(token: string, secret: string): Promise<string | JwtPayload | undefined> {
-  if (!token || !secret) return;
+export async function verifyToken(token: string, secret?: string): Promise<string | JwtPayload | undefined> {
+  if (!token) return;
+  const jwtSecret = secret || await getJwtSecret();
   const verificationOptions: VerifyOptions = {
     issuer: AUTH_ENDPOINT,
     algorithms: ['HS256'],
   };
-  return jwt.verify(token, secret, verificationOptions);
+  return jwt.verify(token, jwtSecret, verificationOptions);
 }
 
 export async function listItems(): Promise<Auth[]> {

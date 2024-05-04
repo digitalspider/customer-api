@@ -23,9 +23,8 @@ export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Prom
     return generatePolicy('', 'Deny', methodArn);
   }
   let tokenData: string | JwtPayload | undefined;
-  const secret = await getJwtSecret();
   try {
-    tokenData = await verifyToken(token, secret);
+    tokenData = await verifyToken(token);
   } catch (e) {
     console.error('jwt token verification failed', e);
   }
