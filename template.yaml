@@ -62,7 +62,7 @@ Mappings:
     prod:
       CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/e726795b-fa86-4eb7-bf68-c7cb999acc4b
     staging:
-      CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b5ec5fcb-6e43-428d-bf51-fa45fe6e4f9c
+      CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/4173bb17-2f46-489a-8349-5cf21d5ae7b5
     dev:
       CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b5ec5fcb-6e43-428d-bf51-fa45fe6e4f9c
     local:
