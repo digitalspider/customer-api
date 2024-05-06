@@ -181,6 +181,9 @@ Resources:
             FunctionPayloadType: REQUEST
             FunctionArn:
               Fn::GetAtt: LambdaRequestAuthorizer.Arn
+            Identity:
+              Headers:
+                - Authorization
       MethodSettings:
         - ResourcePath: /* # allows for logging on any resource
           HttpMethod: '*' # allows for logging on any method
