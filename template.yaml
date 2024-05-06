@@ -91,10 +91,11 @@ Resources:
   #END: Security group
 
   #BEGIN: Route53
-  Type: AWS::Route53::HostedZone
-  Properties:
-    Name:
-      Ref: DomainName
+  CustomerHostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name:
+        Ref: DomainName
   #END: Route53
 
   #BEGIN: Api Gateway
