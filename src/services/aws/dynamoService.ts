@@ -1,4 +1,4 @@
-import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
   DynamoDBDocument,
   GetCommand,
@@ -8,6 +8,7 @@ import {
   DeleteCommand,
   QueryCommandInput,
   UpdateCommandInput,
+  ScanCommand,
   ScanCommandInput,
   ScanCommandOutput,
   QueryCommandOutput,
