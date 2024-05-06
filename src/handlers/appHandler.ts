@@ -14,7 +14,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
   const { awsRequestId } = context;
   const { authorizer } = requestContext || {};
   const { tenantId } = authorizer || {};
-  const { id: objectId } = pathParameters || {};
+  const { uuid: objectId } = pathParameters || {};
   const body = bodyString ? JSON.parse(bodyString) : undefined;
   body &&
     console.debug('request', {
@@ -31,7 +31,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
     let result;
     switch (httpMethod) {
       case GET:
-        if (path.endsWith('/')) {
+        if (path.endsWith('/customer')) {
           result = await handleList(tenantId);
         } else {
           if (!objectId) throw new CustomAxiosError('Cannot get customer without a customerId', { status: BadRequest });

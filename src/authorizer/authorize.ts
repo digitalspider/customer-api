@@ -10,7 +10,16 @@ import { extractToken, verifyToken } from '../services/authService';
 type Effect = 'Allow' | 'Deny';
 
 export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Promise<APIGatewayAuthorizerResult> {
-  const { path, methodArn, headers } = event;
+  const { path, methodArn, headers, httpMethod, pathParameters } = event;
+  console.debug('request', {
+    handler: 'authorize.ts',
+    httpMethod,
+    path,
+    pathParameters,
+    methodArn,
+    headers,
+    event,
+  });
   if (!path || path.startsWith('/auth') || path.startsWith('/v1/auth')) {
     return generatePolicy('', 'Allow', methodArn, {
       username: '',
