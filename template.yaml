@@ -141,11 +141,11 @@ Resources:
         CertificateArn:
           Fn::FindInMap: [ReferenceMap, Ref: AWSENV, CertificateARN]
         DomainName:
-          Fn::If: [isProd, Fn::Sub: 'api.${DomainName}', Fn::Sub: 'api.${AWSENV}.${DomainName}']
+          Fn::If: [isProd, Fn::Sub: 'api.${DomainName}', Fn::Sub: 'api-${AWSENV}.${DomainName}']
         EndpointConfiguration: REGIONAL
         Route53:
           HostedZoneName:
-            Fn::If: [isProd, Fn::Sub: '${DomainName}.', Fn::Sub: '${AWSENV}.${DomainName}.']
+            Fn::Sub: '${DomainName}.'
       AccessLogSetting:
         DestinationArn:
           Fn::GetAtt: CustomerAccessLogs.Arn
