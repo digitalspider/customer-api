@@ -10,7 +10,8 @@ import { extractToken, verifyToken } from '../services/authService';
 type Effect = 'Allow' | 'Deny';
 
 export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Promise<APIGatewayAuthorizerResult> {
-  const { path, methodArn, headers, httpMethod, pathParameters } = event;
+  const { path, methodArn, headers, httpMethod, pathParameters, requestContext } = event;
+  const { identity } = requestContext || {};
   console.debug('request', {
     handler: 'authorize.ts',
     httpMethod,
@@ -18,7 +19,8 @@ export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Prom
     pathParameters,
     methodArn,
     headers,
-    event,
+    identity,
+    istring: JSON.stringify(identity),
   });
   if (!path || path.startsWith('/auth') || path.startsWith('/v1/auth')) {
     return generatePolicy('', 'Allow', methodArn, {
@@ -26,7 +28,9 @@ export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Prom
     });
   }
   const authHeader = headers?.Authorization || headers?.authoization || '';
+  console.log({ authHeader });
   const token = extractToken(authHeader, 'bearer');
+  console.log({ token });
   if (!token) {
     console.log('Authorization denied. Invalid Authorization header');
     return generatePolicy('', 'Deny', methodArn);
