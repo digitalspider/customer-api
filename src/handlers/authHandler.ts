@@ -14,7 +14,13 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
   const { httpMethod, path, headers, body: bodyString } = event;
   const { awsRequestId } = context;
   const body = bodyString ? JSON.parse(bodyString) : undefined;
-  console.log('request', { handler: 'authHandler', httpMethod, path, awsRequestId });
+  console.debug('request', {
+    handler: 'authHandler',
+    httpMethod,
+    path,
+    awsRequestId,
+    body: bodyString,
+  });
 
   try {
     let data;
@@ -59,7 +65,9 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
 
 async function handleCreateJwt(input: LoginInput): Promise<string> {
   const { username: usernameInput, password: passwordInput } = input || {};
+  console.debug('getting user');
   const user = await getItem(usernameInput);
+  console.debug('got user', { user });
   const { username, password, tenantId, expiryInSec } = user || {};
   if (!user || passwordInput !== password) {
     throw new CustomAxiosError('Username or password is invalid', { status: Unauthorized });

@@ -24,7 +24,7 @@ export async function handler(event: APIGatewayProxyEvent, context: Context): Pr
       awsRequestId,
       tenantId,
       objectId,
-      body: JSON.stringify(body),
+      body: bodyString,
     });
 
   try {

@@ -9,7 +9,7 @@ Globals:
     Architectures:
       - x86_64
     MemorySize: 256
-    Timeout: 90
+    Timeout: 30
     VpcConfig:
       SubnetIds:
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet1:1}}"
