@@ -90,6 +90,13 @@ Resources:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
   #END: Security group
 
+  #BEGIN: Route53
+  Type: AWS::Route53::HostedZone
+  Properties:
+    Name:
+      Ref: DomainName
+  #END: Route53
+
   #BEGIN: Api Gateway
   CustomerAccessLogs:
     Type: AWS::Logs::LogGroup
