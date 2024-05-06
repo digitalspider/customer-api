@@ -29,6 +29,15 @@ servers:
 
 paths:
   /auth/login:
+    options:
+      tags:
+        - Auth
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
     post:
       tags:
         - Auth
@@ -55,6 +64,15 @@ paths:
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
   /auth/signup:
+    options:
+      tags:
+        - Auth
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
     post:
       tags:
         - Auth
@@ -81,6 +99,15 @@ paths:
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
   /auth/verify:
+    options:
+      tags:
+        - Auth
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
     get:
       tags:
         - Auth
@@ -108,6 +135,15 @@ paths:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
 
   /customer:
+    options:
+      tags:
+        - Auth
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
     post:
       tags:
         - Customer
@@ -172,6 +208,15 @@ paths:
         schema:
           $ref: '#/components/schemas/customerId'
         required: true
+    options:
+      tags:
+        - Auth
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
     get:
       tags:
         - Customer
