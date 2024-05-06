@@ -18,17 +18,17 @@ x-amazon-apigateway-request-validators:
 x-amazon-apigateway-request-validator: params-only # Default
 
 servers:
-  - url: https://api.dev.digitalspider.com.au/v1
+  - url: https://api.dev.digitalspider.com.au/v1/auth
     description: Develop server (uses test data)
   - url: http://localhost:3000
     description: Localhost server (uses test data)
-  - url: https://api.staging.digitalspider.com.au/v1
+  - url: https://api.staging.digitalspider.com.au/v1/auth
     description: Staging server (uses test data)
-  - url: https://api.digitalspider.com.au/v1
+  - url: https://api.digitalspider.com.au/v1/auth
     description: Production server (uses live data)
 
 paths:
-  /auth/login:
+  /login:
     options:
       tags:
         - CORS
@@ -66,7 +66,7 @@ paths:
         type: AWS_PROXY
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
-  /auth/signup:
+  /signup:
     options:
       tags:
         - CORS
@@ -104,7 +104,7 @@ paths:
         type: AWS_PROXY
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
-  /auth/verify:
+  /verify:
     options:
       tags:
         - CORS

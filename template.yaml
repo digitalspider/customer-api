@@ -138,7 +138,7 @@ Resources:
             Location: auth.openapi.yaml
       Domain:
         BasePath:
-          - /v1
+          - /v1/auth
         CertificateArn:
           Fn::FindInMap: [ReferenceMap, Ref: AWSENV, CertificateARN]
         DomainName:
@@ -410,7 +410,7 @@ Resources:
         Login:
           Type: Api
           Properties:
-            Path: /auth/login
+            Path: /login
             Method: post
             RestApiId:
               Ref: AuthApi
@@ -419,7 +419,7 @@ Resources:
         SignUp:
           Type: Api
           Properties:
-            Path: /auth/signup
+            Path: /signup
             Method: post
             RestApiId:
               Ref: AuthApi
@@ -428,7 +428,7 @@ Resources:
         VerifyJWT:
           Type: Api
           Properties:
-            Path: /auth/verify
+            Path: /verify
             Method: get
             RestApiId:
               Ref: AuthApi
