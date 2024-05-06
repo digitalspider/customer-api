@@ -99,16 +99,64 @@ Resources:
   #END: Route53
 
   #BEGIN: Api Gateway
-  CustomerAccessLogs:
+  AccessLogs:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName:
-        Fn::Sub: /logs/customer/api-access-logs-${AWSENV}
+        Fn::Sub: /logs/api-gateway/api-access-logs-${AWSENV}
       RetentionInDays: 30
-    # AWS::Logs::LogGroup does not support Tags
+
+  # Need to enable logs: https://coady.tech/aws-cloudwatch-logs-arn/ and https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-logging.html
+  AuthApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name:
+        Fn::Sub: auth-api-${AWSENV}
+      Description: Auth API Gateway
+      EndpointConfiguration:
+        Type: REGIONAL
+      TracingEnabled: true
+      StageName:
+        Ref: StageName
+      Cors:
+        AllowMethods: "'POST, GET, PUT'"
+        AllowHeaders: "'X-Forwarded-For,Content-Type,Authorization,X-Amz-Date,X-Amz-Security-Token,AccessToken'"
+        AllowOrigin:
+          Fn::If: [isProd, Ref: DomainName, Fn::If: [isLocal, '*', Fn::Sub: '${AWSENV}.${DomainName}']]
+        MaxAge: "'600'"
+        AllowCredentials: true
+      MethodSettings:
+        - ResourcePath: /* # allows for logging on any resource
+          HttpMethod: '*' # allows for logging on any method
+          LoggingLevel: ERROR
+          MetricsEnabled: true # Requires setup
+          DataTraceEnabled: true
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: auth.openapi.yaml
+      Domain:
+        BasePath:
+          - /v1
+        CertificateArn:
+          Fn::FindInMap: [ReferenceMap, Ref: AWSENV, CertificateARN]
+        DomainName:
+          Fn::If: [isProd, Fn::Sub: 'api.${DomainName}', Fn::Sub: 'api-${AWSENV}.${DomainName}']
+        EndpointConfiguration: REGIONAL
+        Route53:
+          HostedZoneName:
+            Fn::Sub: '${DomainName}.'
+      AccessLogSetting:
+        DestinationArn:
+          Fn::GetAtt: AccessLogs.Arn
+        Format: requestId:$context.requestId,APIId:$context.apiId,PrincipalId:$context.authorizer.principalId,XRayId:$context.xrayTraceId,SourceIp:$context.identity.sourceIp,Protocol:$context.protocol,HttpMethod:$context.httpMethod,DomainName:$context.domainName,Stage:$context.stage,RequestPath:$context.path,ResourcePath:$context.resourcePath,RequestTime:$context.requestTime,ResponseLatency:$context.responseLatency,ResponseStatus:$context.status,Validation:$context.error.validationErrorString,WAFLatency:$context.waf.latency,AuthenticateLatency:$context.authenticate.latency,AuthorizerLatency:$context.authorizer.latency,AuthorizeLatency:$context.authorize.latency,IntegrationLatency:$context.integration.latency
+      Tags:
+        Name: Auth API Gateway
+        Description: Auth API Gateway
 
   CustomerApi:
-    Type: AWS::Serverless::Api # Need to enable logs: https://coady.tech/aws-cloudwatch-logs-arn/ and https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-logging.html
+    Type: AWS::Serverless::Api
     Properties:
       Name:
         Fn::Sub: customer-api-${AWSENV}
@@ -156,7 +204,7 @@ Resources:
             Fn::Sub: '${DomainName}.'
       AccessLogSetting:
         DestinationArn:
-          Fn::GetAtt: CustomerAccessLogs.Arn
+          Fn::GetAtt: AccessLogs.Arn
         Format: requestId:$context.requestId,APIId:$context.apiId,PrincipalId:$context.authorizer.principalId,XRayId:$context.xrayTraceId,SourceIp:$context.identity.sourceIp,Protocol:$context.protocol,HttpMethod:$context.httpMethod,DomainName:$context.domainName,Stage:$context.stage,RequestPath:$context.path,ResourcePath:$context.resourcePath,RequestTime:$context.requestTime,ResponseLatency:$context.responseLatency,ResponseStatus:$context.status,Validation:$context.error.validationErrorString,WAFLatency:$context.waf.latency,AuthenticateLatency:$context.authenticate.latency,AuthorizerLatency:$context.authorizer.latency,AuthorizeLatency:$context.authorize.latency,IntegrationLatency:$context.integration.latency
       Tags:
         Name: Customer API Gateway
@@ -365,7 +413,7 @@ Resources:
             Path: /auth/login
             Method: post
             RestApiId:
-              Ref: CustomerApi
+              Ref: AuthApi
             Stage:
               Ref: StageName
         SignUp:
@@ -374,7 +422,7 @@ Resources:
             Path: /auth/signup
             Method: post
             RestApiId:
-              Ref: CustomerApi
+              Ref: AuthApi
             Stage:
               Ref: StageName
         VerifyJWT:
@@ -383,7 +431,7 @@ Resources:
             Path: /auth/verify
             Method: get
             RestApiId:
-              Ref: CustomerApi
+              Ref: AuthApi
             Stage:
               Ref: StageName
     Metadata: # Manage esbuild properties

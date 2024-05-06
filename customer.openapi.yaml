@@ -4,8 +4,8 @@ info:
   title: Customers API
   description: Digital Spider Customers APIs
 tags:
-  - name: Auth
   - name: Customer
+  - name: CORS
 
 # AWS Validators
 x-amazon-apigateway-request-validators:
@@ -28,125 +28,10 @@ servers:
     description: Production server (uses live data)
 
 paths:
-  /auth/login:
-    options:
-      tags:
-        - Auth
-      responses:
-        200:
-          description: success
-      x-amazon-apigateway-request-validator: all
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        type: AWS_PROXY
-        uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
-    post:
-      tags:
-        - Auth
-      operationId: Login
-      description: Login to get a JWT
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/loginInput'
-      responses:
-        200:
-          description: success
-        400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
-      x-amazon-apigateway-request-validator: all
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        type: AWS_PROXY
-        uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
-  /auth/signup:
-    options:
-      tags:
-        - Auth
-      responses:
-        200:
-          description: success
-      x-amazon-apigateway-request-validator: all
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        type: AWS_PROXY
-        uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
-    post:
-      tags:
-        - Auth
-      operationId: SignUp
-      description: SignUp to create a new user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/signUpInput'
-      responses:
-        200:
-          description: success
-        400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
-      x-amazon-apigateway-request-validator: all
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        type: AWS_PROXY
-        uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
-  /auth/verify:
-    options:
-      tags:
-        - Auth
-      responses:
-        200:
-          description: success
-      x-amazon-apigateway-request-validator: all
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        type: AWS_PROXY
-        uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
-    get:
-      tags:
-        - Auth
-      operationId: VerifyJWT
-      description: Verify the JWT by passing the Authorization header, with a Bearer token
-      responses:
-        200:
-          description: success
-        400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
-        401:
-          description: The request authorization is invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorUnauthorized'
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        type: AWS_PROXY
-        uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
-
   /customer:
     options:
       tags:
-        - Customer
+        - CORS
       responses:
         200:
           description: success
@@ -222,7 +107,7 @@ paths:
         required: true
     options:
       tags:
-        - Customer
+        - CORS
       responses:
         200:
           description: success
@@ -368,14 +253,6 @@ components:
       required:
         - message
 
-    username:
-      type: string
-      description: The username logging in, usually an email address
-      example: "{{username}}"
-    password:
-      type: string
-      description: The password for the user
-      example: "{{password}}"
     customerId:
       type: string
       description: An identifier for an external facing entity.\nThis field is generated and cannot be set or edited. Used for lookups, updates, and deletes
@@ -422,23 +299,6 @@ components:
       description: The operating system of the device
       pattern: '^[a-zA-Z0-9-_/ ]+$'
       example: 'Windows/XP'
-
-    loginInput:
-      type: object
-      properties:
-        username:
-          $ref: '#/components/schemas/username'
-        password:
-          $ref: '#/components/schemas/password'
-    signUpInput:
-      type: object
-      properties:
-        username:
-          $ref: '#/components/schemas/username'
-        password:
-          $ref: '#/components/schemas/password'
-        tenantId:
-          $ref: '#/components/schemas/tenantId'
 
     customer:
       type: object

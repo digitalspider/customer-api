@@ -1,0 +1,212 @@
+openapi: 3.0.3
+info:
+  version: '1.0'
+  title: Auth API
+  description: Digital Spider Auth APIs
+tags:
+  - name: Auth
+  - name: CORS
+
+# AWS Validators
+x-amazon-apigateway-request-validators:
+  all:
+    validateRequestBody: true
+    validateRequestParameters: true
+  params-only:
+    validateRequestBody: false
+    validateRequestParameters: true
+x-amazon-apigateway-request-validator: params-only # Default
+
+servers:
+  - url: https://api.dev.digitalspider.com.au/v1
+    description: Develop server (uses test data)
+  - url: http://localhost:3000
+    description: Localhost server (uses test data)
+  - url: https://api.staging.digitalspider.com.au/v1
+    description: Staging server (uses test data)
+  - url: https://api.digitalspider.com.au/v1
+    description: Production server (uses live data)
+
+paths:
+  /auth/login:
+    options:
+      tags:
+        - CORS
+      responses:
+        200:
+          description: success
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
+    post:
+      tags:
+        - Auth
+      operationId: Login
+      description: Login to get a JWT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/loginInput'
+      responses:
+        200:
+          description: success
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
+  /auth/signup:
+    options:
+      tags:
+        - CORS
+      responses:
+        200:
+          description: success
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
+    post:
+      tags:
+        - Auth
+      operationId: SignUp
+      description: SignUp to create a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/signUpInput'
+      responses:
+        200:
+          description: success
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
+  /auth/verify:
+    options:
+      tags:
+        - CORS
+      responses:
+        200:
+          description: success
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
+    get:
+      tags:
+        - Auth
+      operationId: VerifyJWT
+      description: Verify the JWT by passing the Authorization header, with a Bearer token
+      responses:
+        200:
+          description: success
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+        401:
+          description: The request authorization is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorUnauthorized'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthApiFunction.Arn}/invocations
+
+components:
+  schemas:
+    commonErrorData:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error message
+        code:
+          type: string
+          description: The error code
+          example: ERR_00002
+        level:
+          type: string
+          description: The error level
+          example: Error
+        timestamp:
+          type: string
+          format: date-time
+          description: The timestamp that the error occurred
+        details:
+          type: string
+          description: Optional additional error details
+          nullable: true
+      required:
+        - message
+        - timestamp
+    commonErrorUnauthorized:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error message
+          example: Unauthorized
+      required:
+        - message
+
+    username:
+      type: string
+      description: The username logging in, usually an email address
+      example: "{{username}}"
+    password:
+      type: string
+      description: The password for the user
+      example: "{{password}}"
+    tenantId:
+      type: string
+      description: A identifier of the tenancy of the customer
+      pattern: '^[a-zA-Z0-9-_]+$'
+      example: "{{tenantId}}"
+
+    loginInput:
+      type: object
+      properties:
+        username:
+          $ref: '#/components/schemas/username'
+        password:
+          $ref: '#/components/schemas/password'
+    signUpInput:
+      type: object
+      properties:
+        username:
+          $ref: '#/components/schemas/username'
+        password:
+          $ref: '#/components/schemas/password'
+        tenantId:
+          $ref: '#/components/schemas/tenantId'
