@@ -19,7 +19,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
     httpMethod,
     path,
     awsRequestId,
-    body: bodyString,
+    body,
   });
 
   try {

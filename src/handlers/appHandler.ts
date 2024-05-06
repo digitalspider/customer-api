@@ -9,7 +9,7 @@ import { CustomAxiosError } from '../types/error';
 const { Ok, MethodNotAllowed, InternalServerError, BadRequest } = HttpStatusCode;
 const { GET, POST } = HTTP_METHOD;
 
-export async function handler(event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> {
+export async function handleEvent(event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> {
   const { httpMethod, path, body: bodyString, requestContext, pathParameters } = event;
   const { awsRequestId } = context;
   const { authorizer } = requestContext || {};
@@ -24,7 +24,7 @@ export async function handler(event: APIGatewayProxyEvent, context: Context): Pr
       awsRequestId,
       tenantId,
       objectId,
-      body: bodyString,
+      body,
     });
 
   try {

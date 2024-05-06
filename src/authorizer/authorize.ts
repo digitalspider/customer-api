@@ -74,5 +74,6 @@ function generatePolicy(
   if (context) {
     authResponse.context = context;
   }
+  console.debug({ principalId, effect, resource, context });
   return authResponse;
 }
