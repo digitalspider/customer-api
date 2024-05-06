@@ -1,23 +1,23 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
-  DynamoDBDocument,
-  GetCommand,
-  PutCommand,
-  UpdateCommand,
-  QueryCommand,
+  BatchGetCommand,
+  BatchGetCommandInput,
+  BatchGetCommandOutput,
   DeleteCommand,
+  DynamoDBDocumentClient,
+  GetCommand,
+  GetCommandOutput,
+  PutCommand,
+  PutCommandOutput,
+  QueryCommand,
   QueryCommandInput,
-  UpdateCommandInput,
+  QueryCommandOutput,
   ScanCommand,
   ScanCommandInput,
   ScanCommandOutput,
-  QueryCommandOutput,
+  UpdateCommand,
+  UpdateCommandInput,
   UpdateCommandOutput,
-  GetCommandOutput,
-  PutCommandOutput,
-  BatchGetCommandOutput,
-  BatchGetCommand,
-  BatchGetCommandInput,
 } from '@aws-sdk/lib-dynamodb';
 import { AWS } from '../../common/constants';
 
@@ -49,7 +49,7 @@ const unmarshallOptions = {
 const translateConfig = { marshallOptions, unmarshallOptions };
 
 // Create the DynamoDB Document client.
-const ddbDocClient = DynamoDBDocument.from(ddbClient, translateConfig);
+const ddbDocClient = DynamoDBDocumentClient.from(ddbClient, translateConfig);
 
 export function getDynamoDBClient(): DynamoDBClient {
   return ddbClient;
