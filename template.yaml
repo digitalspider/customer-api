@@ -9,7 +9,7 @@ Globals:
     Architectures:
       - x86_64
     MemorySize: 256
-    Timeout: 30
+    Timeout: 15
     VpcConfig:
       SubnetIds:
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet1:1}}"
@@ -178,6 +178,7 @@ Resources:
         DefaultAuthorizer: LambdaRequestAuthorizer
         Authorizers:
           LambdaRequestAuthorizer:
+            FunctionPayloadType: REQUEST
             FunctionArn:
               Fn::GetAtt: LambdaRequestAuthorizer.Arn
       MethodSettings:
