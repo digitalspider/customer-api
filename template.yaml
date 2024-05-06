@@ -100,7 +100,7 @@ Resources:
     # AWS::Logs::LogGroup does not support Tags
 
   CustomerApi:
-    Type: AWS::Serverless::Api
+    Type: AWS::Serverless::Api # Need to enable logs: https://coady.tech/aws-cloudwatch-logs-arn/ and https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-logging.html
     Properties:
       Name:
         Fn::Sub: customer-api-${AWSENV}
@@ -110,13 +110,13 @@ Resources:
       TracingEnabled: true
       StageName:
         Ref: StageName
-      # Cors:
-      #   AllowMethods: "'POST, GET, PUT'"
-      #   AllowHeaders: "'X-Forwarded-For,Content-Type,Authorization,X-Amz-Date,X-Amz-Security-Token,AccessToken'"
-      #   AllowOrigin:
-      #     Fn::If: [isProd, Ref: DomainName, Fn::If: [isLocal, '*', Fn::Sub: '${AWSENV}.${DomainName}']]
-      #   MaxAge: "'600'"
-      #   AllowCredentials: true
+      Cors:
+        AllowMethods: "'POST, GET, PUT'"
+        AllowHeaders: "'X-Forwarded-For,Content-Type,Authorization,X-Amz-Date,X-Amz-Security-Token,AccessToken'"
+        AllowOrigin:
+          Fn::If: [isProd, Ref: DomainName, Fn::If: [isLocal, '*', Fn::Sub: '${AWSENV}.${DomainName}']]
+        MaxAge: "'600'"
+        AllowCredentials: true
       Auth:
         AddDefaultAuthorizerToCorsPreflight: False # CORS: removes Authorizer from the automatically created OPTIONS methods
         DefaultAuthorizer: LambdaRequestAuthorizer

@@ -32,6 +32,9 @@ paths:
     options:
       tags:
         - Auth
+      responses:
+        200:
+          description: success
       x-amazon-apigateway-request-validator: all
       x-amazon-apigateway-integration:
         httpMethod: POST
@@ -67,6 +70,9 @@ paths:
     options:
       tags:
         - Auth
+      responses:
+        200:
+          description: success
       x-amazon-apigateway-request-validator: all
       x-amazon-apigateway-integration:
         httpMethod: POST
@@ -102,6 +108,9 @@ paths:
     options:
       tags:
         - Auth
+      responses:
+        200:
+          description: success
       x-amazon-apigateway-request-validator: all
       x-amazon-apigateway-integration:
         httpMethod: POST
@@ -137,7 +146,10 @@ paths:
   /customer:
     options:
       tags:
-        - Auth
+        - Customer
+      responses:
+        200:
+          description: success
       x-amazon-apigateway-request-validator: all
       x-amazon-apigateway-integration:
         httpMethod: POST
@@ -210,7 +222,10 @@ paths:
         required: true
     options:
       tags:
-        - Auth
+        - Customer
+      responses:
+        200:
+          description: success
       x-amazon-apigateway-request-validator: all
       x-amazon-apigateway-integration:
         httpMethod: POST
