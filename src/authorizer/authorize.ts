@@ -11,7 +11,7 @@ type Effect = 'Allow' | 'Deny';
 
 export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Promise<APIGatewayAuthorizerResult> {
   const { path, methodArn, headers } = event;
-  if (path.startsWith('/auth') || path.startsWith('/v1/auth')) {
+  if (!path || path.startsWith('/auth') || path.startsWith('/v1/auth')) {
     return generatePolicy('', 'Allow', methodArn, {
       username: '',
     });
