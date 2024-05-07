@@ -77,6 +77,8 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Customer APIs SG
+      SecurityGroupIngress:
+        - SourcePrefixListId: pl-62a5400b
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 80
@@ -86,6 +88,7 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
+        - DestinationPrefixListId: pl-62a5400b
       VpcId:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
   #END: Security group
@@ -332,9 +335,11 @@ Resources:
     Properties:
       ServiceName:
         Fn::Sub: com.amazonaws.${AWS::Region}.secretsmanager
-      RouteTableIds: 
-        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/routetable:1}}"
-      VpcEndpointType: Gateway
+      SubnetIds: 
+        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet1:1}}"
+        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet2:1}}"
+        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet3:1}}"
+      VpcEndpointType: Interface
       VpcId:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
   CustomerSecrets:
