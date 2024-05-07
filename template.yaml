@@ -78,7 +78,8 @@ Resources:
     Properties:
       GroupDescription: Customer APIs SG
       SecurityGroupIngress:
-        - SourcePrefixListId: pl-62a5400b
+        - IpProtocol: tcp
+          SourcePrefixListId: pl-62a5400b
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 80
@@ -88,7 +89,8 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
-        - DestinationPrefixListId: pl-62a5400b
+        - IpProtocol: tcp
+          DestinationPrefixListId: pl-62a5400b
       VpcId:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
   #END: Security group
