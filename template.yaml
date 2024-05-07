@@ -336,7 +336,7 @@ Resources:
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet1:1}}"
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet2:1}}"
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet3:1}}"
-      VpcEndpointType: Interface
+      VpcEndpointType: Gateway
       VpcId:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
   CustomerSecrets:
@@ -357,7 +357,7 @@ Resources:
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet1:1}}"
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet2:1}}"
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet3:1}}"
-      VpcEndpointType: Interface
+      VpcEndpointType: Gateway
       VpcId:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
   AuthTable:
