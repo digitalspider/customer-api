@@ -27,7 +27,7 @@ export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Prom
       username: '',
     });
   }
-  const authHeader = headers?.Authorization || headers?.authoization || '';
+  const authHeader = headers?.Authorization || headers?.authorization || '';
   console.log({ authHeader });
   const token = extractToken(authHeader, 'bearer');
   console.log({ token });
