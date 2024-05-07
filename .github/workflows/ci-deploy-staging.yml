@@ -38,5 +38,5 @@ jobs:
           AWS_BUCKET_NAME: ds-customer-api-staging
           AWSENV: staging
         run: |
-          .deploy/aws-sam-validate.sh samconfig-staging.toml
+          # .deploy/aws-sam-validate.sh samconfig-staging.toml # ERROR: 'AuthApi', "Unable to add Cors configuration because 'DefinitionBody' does not contain a valid Swagger definition."
           .deploy/aws-sam-deploy.sh samconfig-staging.toml

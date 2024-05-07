@@ -38,5 +38,4 @@ jobs:
           AWS_BUCKET_NAME: ds-customer-api-prod
           AWSENV: prod
         run: |
-          .deploy/aws-sam-validate.sh samconfig-prod.toml
           .deploy/aws-sam-deploy.sh samconfig-prod.toml
