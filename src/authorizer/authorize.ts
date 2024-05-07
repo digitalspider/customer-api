@@ -28,9 +28,7 @@ export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Prom
     });
   }
   const authHeader = headers?.Authorization || headers?.authorization || '';
-  console.log({ authHeader });
   const token = extractToken(authHeader, 'bearer');
-  console.log({ token });
   if (!token) {
     console.log('Authorization denied. Invalid Authorization header');
     return generatePolicy('', 'Deny', methodArn);
