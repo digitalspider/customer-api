@@ -27,9 +27,6 @@ jobs:
         with:
           version: 1.72.0
 
-      - name: Validate SAM template
-        run: .deploy/aws-sam-validate.sh samconfig-dev.toml
-
       - name: Build
         run: yarn build
 
@@ -43,4 +40,5 @@ jobs:
           AWS_BUCKET_NAME: ds-customer-api-dev
           AWSENV: dev
         run: |
+          .deploy/aws-sam-validate.sh samconfig-dev.toml
           .deploy/aws-sam-deploy.sh samconfig-dev.toml
