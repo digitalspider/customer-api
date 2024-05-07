@@ -1,6 +1,6 @@
 export const AWSENV = process.env.AWSENV === 'local' ? 'dev' : process.env.AWSENV;
 
-export const { SECRET_MANAGER_NAME = `customer-secrets-${AWSENV}` } = process.env;
+export const { SECRET_MANAGER_NAME = `secrets-${AWSENV}` } = process.env;
 
 export const CUSTOMER_ENDPOINT =
   AWSENV === 'prod'
