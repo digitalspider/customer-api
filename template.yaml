@@ -337,7 +337,7 @@ Resources:
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet3:1}}"
       VpcEndpointType: Interface
       VpcId:
-        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
+        Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
   CustomerSecrets:
     Type: AWS::SecretsManager::Secret
     Properties: 
@@ -357,7 +357,7 @@ Resources:
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet3:1}}"
       VpcEndpointType: Interface
       VpcId:
-        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
+        Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
   AuthTable:
     Type: AWS::DynamoDB::Table
     Properties:
