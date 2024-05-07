@@ -25,6 +25,9 @@ jobs:
       - name: Install SAM
         uses: aws-actions/setup-sam@v2
 
+      - name: Validate SAM template
+        run: .deploy/aws-sam-validate.sh
+
       - name: Build
         run: yarn build
 
