@@ -339,8 +339,6 @@ Resources:
       VpcEndpointType: Interface
       VpcId:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
-      Tags:
-        Name: Secrets VPCEndpoint
   CustomerSecrets:
     Type: AWS::SecretsManager::Secret
     Properties: 
@@ -362,8 +360,6 @@ Resources:
       VpcEndpointType: Interface
       VpcId:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
-      Tags:
-        Name: DynamoDB VPCEndpoint
   AuthTable:
     Type: AWS::DynamoDB::Table
     Properties:
