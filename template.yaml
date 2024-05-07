@@ -330,7 +330,8 @@ Resources:
   SecretsVPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
-      ServiceName: com.amazonaws.ap-southeast-2.secretsmanager
+      ServiceName:
+        Fn::Sub: com.amazonaws.${AWS::Region}.secretsmanager
       SubnetIds: 
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet1:1}}"
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet2:1}}"
@@ -338,6 +339,8 @@ Resources:
       VpcEndpointType: Interface
       VpcId:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
+      Tags:
+        Name: Secrets VPCEndpoint
   CustomerSecrets:
     Type: AWS::SecretsManager::Secret
     Properties: 
@@ -350,7 +353,8 @@ Resources:
   DynamoVPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
-      ServiceName: com.amazonaws.ap-southeast-2.dynamodb
+      ServiceName:
+        Fn::Sub: com.amazonaws.${AWS::Region}.dynamodb
       SubnetIds: 
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet1:1}}"
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet2:1}}"
@@ -358,6 +362,8 @@ Resources:
       VpcEndpointType: Interface
       VpcId:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
+      Tags:
+        Name: DynamoDB VPCEndpoint
   AuthTable:
     Type: AWS::DynamoDB::Table
     Properties:
