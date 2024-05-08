@@ -19,6 +19,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
     httpMethod,
     path,
     awsRequestId,
+    headers,
     body,
   });
 
@@ -36,6 +37,9 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           data = { token };
         } else if (path.endsWith('/signup')) {
           // const authData = await validateBasicAuth(event); // TODO: extra security
+          const { username } = body;
+          const existingUser = await getItem(username);
+          if (existingUser) throw new CustomAxiosError(`${username} already exists`, { status: BadRequest });
           const user = await createItem(body as Auth);
           const token = await handleCreateJwt(user as LoginInput);
           data = { token };
