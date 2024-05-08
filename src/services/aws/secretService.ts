@@ -57,9 +57,7 @@ async function getSecretFromSecretsManager(secretName: string, isJson = true) {
     client = getClient();
   }
   const command = new GetSecretValueCommand({ SecretId: secretName });
-  console.debug('Getting secret '+secretName);
   const response = await client.send(command);
-  console.debug('Got secret '+secretName);
   let secretString: string;
   // Decode based on the secret type
   if (response.SecretString !== undefined) {
