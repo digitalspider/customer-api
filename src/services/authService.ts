@@ -34,7 +34,7 @@ export async function createJwt(data: JwtPayload, secret?: string, expiryInSec?:
   if (!data) return '';
   console.debug('getting secret');
   const jwtSecret = secret || (await getJwtSecret());
-  console.debug('got secret', { jwtSecret });
+  console.debug('got secret');
   const iat = Math.floor(Date.now() / 1000) - 30; // 30 seconds ago
   const expiresIn = expiryInSec || 4 * 60 * 60; // Default is 4h
   const payload: JwtPayload = {
