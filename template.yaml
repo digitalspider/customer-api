@@ -72,10 +72,14 @@ Mappings:
       CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b5ec5fcb-6e43-428d-bf51-fa45fe6e4f9c
   DomainNameHosts:
     url:
-      cors: Fn::If: [isProd, Ref: DomainName, Fn::If: [isLocal, '*', Fn::Sub: '${AWSENV}.${DomainName}']]
-      ui: Fn::If: [isProd, Ref: DomainName, Fn::Sub: '${AWSENV}.${DomainName}']
-      api: Fn::If: [isProd, Fn::Sub: 'api.${DomainName}', Fn::Sub: 'api-${AWSENV}.${DomainName}']
-      auth: Fn::If: [isProd, Fn::Sub: 'api.${DomainName}', Fn::Sub: 'api-${AWSENV}.${DomainName}'] # TODO: Change API to auth.xxx
+      cors:
+        Fn::If: [isProd, Ref: DomainName, Fn::If: [isLocal, '*', Fn::Sub: '${AWSENV}.${DomainName}']]
+      ui:
+        Fn::If: [isProd, Ref: DomainName, Fn::Sub: '${AWSENV}.${DomainName}']
+      api:
+        Fn::If: [isProd, Fn::Sub: 'api.${DomainName}', Fn::Sub: 'api-${AWSENV}.${DomainName}']
+      auth:
+        Fn::If: [isProd, Fn::Sub: 'auth.${DomainName}', Fn::Sub: 'auth-${AWSENV}.${DomainName}']
 
 Resources:
   #BEGIN: Security groups
@@ -173,7 +177,7 @@ Resources:
         CertificateArn:
           Fn::FindInMap: [ReferenceMap, Ref: AWSENV, CertificateARN]
         DomainName:
-          Fn::FindInMap: [DomainNameHosts, url, api]
+          Fn::FindInMap: [DomainNameHosts, url, auth]
         EndpointConfiguration: REGIONAL
         Route53:
           HostedZoneName:
