@@ -35,11 +35,9 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
         break;
       case POST:
         if (path.endsWith('/login')) {
-          // const authData = await validateBasicAuth(event); // TODO: extra security
           const token = await handleCreateJwt(body as LoginInput);
           data = { token };
         } else if (path.endsWith('/signup')) {
-          // const authData = await validateBasicAuth(event); // TODO: extra security
           const { username } = body;
           const existingUser = username ? (await getItem(username)) : undefined;
           if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
@@ -47,8 +45,8 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           const user = await createItem(body as Auth);
           if (!user) throw new CustomAxiosError('Failed to create new user', { status: BadRequest, data: { username } });
           if (!user.tenantId) throw new CustomAxiosError('Failed to set tenantId for user', { status: BadRequest, data: { username } });
-          delete body.password;
-          const customer = await createCustomer(user.tenantId, body as Customer);
+          const { password, ...safeBody } = body; // remove password from body
+          const customer = await createCustomer(user.tenantId, safeBody as Customer);
           if (!customer) throw new CustomAxiosError('Failed to create new customer', { status: BadRequest, data: { username } });
           const token = await handleCreateJwt(user as LoginInput);
           data = { token };
