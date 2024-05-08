@@ -20,7 +20,6 @@ export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Prom
     methodArn,
     headers,
     identity,
-    istring: JSON.stringify(identity),
   });
   if (!path || path.startsWith('/auth') || path.startsWith('/v1/auth')) {
     return generatePolicy('', 'Allow', methodArn, {

@@ -5,6 +5,8 @@ import { createJwt, extractToken, getItem, mapAuthToToken, verifyToken, createIt
 import { createResponse } from '../services/utils';
 import { Auth, LoginInput } from '../types/auth';
 import { CustomAxiosError } from '../types/error';
+import { createCustomer } from '../services/customerService';
+import { Customer } from '../types/customer';
 
 const { Ok, BadRequest, InternalServerError, MethodNotAllowed, Unauthorized } = HttpStatusCode;
 const { GET, POST } = HTTP_METHOD;
@@ -37,10 +39,14 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           data = { token };
         } else if (path.endsWith('/signup')) {
           // const authData = await validateBasicAuth(event); // TODO: extra security
-          const { username } = body;
+          const { username, tenantId } = body;
           const existingUser = username ? (await getItem(username)) : undefined;
           if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
           const user = await createItem(body as Auth);
+          if (!user) throw new CustomAxiosError('Failed to create new user', { status: BadRequest, data: { username } });
+          if (!user.tenantId) throw new CustomAxiosError('Failed to set tenantId for user', { status: BadRequest, data: { username } });
+          const customer = await createCustomer(user.tenantId, body as Customer);
+          if (!customer) throw new CustomAxiosError('Failed to create new customer', { status: BadRequest, data: { username } });
           const token = await handleCreateJwt(user as LoginInput);
           data = { token };
         }
