@@ -451,7 +451,7 @@ Resources:
     Properties:
       Description: Lambda API Authorizer
       FunctionName:
-        Fn::Sub: auth-api-authorizor-${AWSENV}
+        Fn::Sub: auth-api-authorizer-${AWSENV}
       Role:
         Fn::GetAtt: AuthLambdaIAMRole.Arn
       CodeUri: src/authorizer/
@@ -465,6 +465,9 @@ Resources:
             Fn::Sub: ${AWSENV}
           DOMAIN_NAME:
             Ref: DomainName
+      LoggingConfig:
+        LogGroup:
+          Ref: LambdaRequestAuthorizerLogGroup
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
@@ -493,6 +496,9 @@ Resources:
             Fn::Sub: ${AWSENV}
           DOMAIN_NAME:
             Ref: DomainName
+      LoggingConfig:
+        LogGroup:
+          Ref: AuthApiFunctionLogGroup
       Events:
         Login:
           Type: Api
@@ -549,6 +555,9 @@ Resources:
             Fn::Sub: ${AWSENV}
           DOMAIN_NAME:
             Ref: DomainName
+      LoggingConfig:
+        LogGroup:
+          Ref: CustomerApiFunctionLogGroup
       Events:
         CreateCustomer:
           Type: Api
@@ -625,28 +634,19 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName:
-        Fn::Join:
-          - ''
-          - - /aws/lambda/
-            - Ref: LambdaRequestAuthorizer
+        Fn::Sub: /aws/lambda/auth-api-authorizer-${AWSENV}
       RetentionInDays: 30
   AuthApiFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName:
-        Fn::Join:
-          - ''
-          - - /aws/lambda/
-            - Ref: AuthApiFunction
+        Fn::Sub: /aws/lambda/auth-api-${AWSENV}
       RetentionInDays: 30
   CustomerApiFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName:
-        Fn::Join:
-          - ''
-          - - /aws/lambda/
-            - Ref: CustomerApiFunction
+        Fn::Sub: /aws/lambda/customer-api-${AWSENV}
       RetentionInDays: 30
   #END: Lambda LogGroups
 
