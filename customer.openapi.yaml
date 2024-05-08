@@ -18,14 +18,14 @@ x-amazon-apigateway-request-validators:
 x-amazon-apigateway-request-validator: params-only # Default
 
 servers:
-  - url: https://api.dev.digitalspider.com.au/v1
-    description: Develop server (uses test data)
-  - url: http://localhost:3000
-    description: Localhost server (uses test data)
   - url: https://api.staging.digitalspider.com.au/v1
     description: Staging server (uses test data)
   - url: https://api.digitalspider.com.au/v1
     description: Production server (uses live data)
+  - url: https://api.dev.digitalspider.com.au/v1
+    description: Develop server (uses test data)
+  - url: http://localhost:3000
+    description: Localhost server (uses test data)
 
 paths:
   /customer:
