@@ -7,6 +7,7 @@ import { Auth, LoginInput } from '../types/auth';
 import { CustomAxiosError } from '../types/error';
 import { createCustomer } from '../services/customerService';
 import { Customer } from '../types/customer';
+import { createHash } from 'node:crypto';
 
 const { Ok, BadRequest, InternalServerError, MethodNotAllowed, Unauthorized } = HttpStatusCode;
 const { GET, POST } = HTTP_METHOD;
@@ -42,9 +43,11 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           const { username } = body;
           const existingUser = username ? (await getItem(username)) : undefined;
           if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
+          body.password = hash(body.password);
           const user = await createItem(body as Auth);
           if (!user) throw new CustomAxiosError('Failed to create new user', { status: BadRequest, data: { username } });
           if (!user.tenantId) throw new CustomAxiosError('Failed to set tenantId for user', { status: BadRequest, data: { username } });
+          delete body.password;
           const customer = await createCustomer(user.tenantId, body as Customer);
           if (!customer) throw new CustomAxiosError('Failed to create new customer', { status: BadRequest, data: { username } });
           const token = await handleCreateJwt(user as LoginInput);
@@ -78,7 +81,7 @@ async function handleCreateJwt(input: LoginInput): Promise<string> {
   const user = await getItem(usernameInput);
   console.debug('got user', { user });
   const { username, password, tenantId, expiryInSec } = user || {};
-  if (!user || passwordInput !== password) {
+  if (!user || hash(passwordInput) !== password) {
     throw new CustomAxiosError('Username or password is invalid', { status: Unauthorized });
   }
   if (!tenantId) {
@@ -88,21 +91,8 @@ async function handleCreateJwt(input: LoginInput): Promise<string> {
   return createJwt(payload, undefined, expiryInSec);
 }
 
-async function validateBasicAuth(event: APIGatewayProxyEvent): Promise<Auth> {
-  const { httpMethod, path, requestContext, headers } = event;
-  const { domainName } = requestContext;
-  const token = extractTokenFromHeaders(headers, 'basic');
-  const { username = getLocalhostTenant(domainName), jwtPass } = decodeToken(token);
-  console.debug(`${httpMethod} ${path} ${username}`);
-  if (!username) {
-    throw new CustomAxiosError('Invalid Username', { status: Unauthorized });
-  }
-  const authData = await getItem(username);
-  const { password, ...authDataWithoutPassword } = authData || { username };
-  if (jwtPass !== password) {
-    throw new CustomAxiosError('Invalid Basic Authentication parameters', { status: Unauthorized });
-  }
-  return authDataWithoutPassword;
+function hash(input: string) {
+  return createHash('sha3-256').update(input, 'utf8').digest('hex');
 }
 
 function extractTokenFromHeaders(headers: APIGatewayProxyEventHeaders, expectedScheme?: string) {
