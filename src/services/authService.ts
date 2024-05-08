@@ -1,10 +1,10 @@
 import jwt, { JwtPayload, SignOptions, VerifyOptions } from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
-import { AUTH_ENDPOINT, SECRET_MANAGER_NAME } from '../common/config';
-import { Auth } from '../types/auth';
-import * as dynamo from './dynamo/auth';
-import { getSecret } from './aws/secretService';
+import { SECRET_MANAGER_NAME, URL_AUTH } from '../common/config';
 import { JWT_SECRET_NAME } from '../common/constants';
+import { Auth } from '../types/auth';
+import { getSecret } from './aws/secretService';
+import * as dynamo from './dynamo/auth';
 
 export function mapAuthToToken(authData: Auth): JwtPayload {
   const { username, tenantId, context } = authData;
@@ -40,7 +40,7 @@ export async function createJwt(data: JwtPayload, secret?: string, expiryInSec?:
   const payload: JwtPayload = {
     iat,
     ...data,
-    iss: AUTH_ENDPOINT,
+    iss: URL_AUTH,
   };
 
   const encryptionOptions: SignOptions = {
@@ -54,7 +54,7 @@ export async function verifyToken(token: string, secret?: string): Promise<strin
   if (!token) return;
   const jwtSecret = secret || (await getJwtSecret());
   const verificationOptions: VerifyOptions = {
-    issuer: AUTH_ENDPOINT,
+    issuer: URL_AUTH,
     algorithms: ['HS256'],
   };
   return jwt.verify(token, jwtSecret, verificationOptions);

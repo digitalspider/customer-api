@@ -70,6 +70,12 @@ Mappings:
       CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b5ec5fcb-6e43-428d-bf51-fa45fe6e4f9c
     local:
       CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b5ec5fcb-6e43-428d-bf51-fa45fe6e4f9c
+  DomainNameHosts:
+    url:
+      cors: Fn::If: [isProd, Ref: DomainName, Fn::If: [isLocal, '*', Fn::Sub: '${AWSENV}.${DomainName}']]
+      ui: Fn::If: [isProd, Ref: DomainName, Fn::Sub: '${AWSENV}.${DomainName}']
+      api: Fn::If: [isProd, Fn::Sub: 'api.${DomainName}', Fn::Sub: 'api-${AWSENV}.${DomainName}']
+      auth: Fn::If: [isProd, Fn::Sub: 'api.${DomainName}', Fn::Sub: 'api-${AWSENV}.${DomainName}'] # TODO: Change API to auth.xxx
 
 Resources:
   #BEGIN: Security groups
@@ -147,7 +153,7 @@ Resources:
         AllowMethods: "'POST, GET, PUT'"
         AllowHeaders: "'X-Forwarded-For,Content-Type,Authorization,X-Amz-Date,X-Amz-Security-Token,AccessToken'"
         AllowOrigin:
-          Fn::If: [isProd, Ref: DomainName, Fn::If: [isLocal, '*', Fn::Sub: '${AWSENV}.${DomainName}']]
+          Fn::FindInMap: [DomainNameHosts, url, cors]
         MaxAge: "'600'"
         AllowCredentials: true
       MethodSettings:
@@ -167,7 +173,7 @@ Resources:
         CertificateArn:
           Fn::FindInMap: [ReferenceMap, Ref: AWSENV, CertificateARN]
         DomainName:
-          Fn::If: [isProd, Fn::Sub: 'api.${DomainName}', Fn::Sub: 'api-${AWSENV}.${DomainName}']
+          Fn::FindInMap: [DomainNameHosts, url, api]
         EndpointConfiguration: REGIONAL
         Route53:
           HostedZoneName:
@@ -195,7 +201,7 @@ Resources:
         AllowMethods: "'POST, GET, PUT'"
         AllowHeaders: "'X-Forwarded-For,Content-Type,Authorization,X-Amz-Date,X-Amz-Security-Token,AccessToken'"
         AllowOrigin:
-          Fn::If: [isProd, Ref: DomainName, Fn::If: [isLocal, '*', Fn::Sub: '${AWSENV}.${DomainName}']]
+          Fn::FindInMap: [DomainNameHosts, url, cors]
         MaxAge: "'600'"
         AllowCredentials: true
       Auth:
@@ -226,7 +232,7 @@ Resources:
         CertificateArn:
           Fn::FindInMap: [ReferenceMap, Ref: AWSENV, CertificateARN]
         DomainName:
-          Fn::If: [isProd, Fn::Sub: 'api.${DomainName}', Fn::Sub: 'api-${AWSENV}.${DomainName}']
+          Fn::FindInMap: [DomainNameHosts, url, api]
         EndpointConfiguration: REGIONAL
         Route53:
           HostedZoneName:
@@ -434,6 +440,14 @@ Resources:
         Variables:
           AWSENV:
             Fn::Sub: ${AWSENV}
+          DOMAIN_NAME:
+            Ref: DomainName
+          URL_API:
+            Fn::FindInMap: [DomainNameHosts, url, api]
+          URL_UI:
+            Fn::FindInMap: [DomainNameHosts, url, ui]
+          URL_AUTH:
+            Fn::FindInMap: [DomainNameHosts, url, auth]
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
@@ -460,6 +474,14 @@ Resources:
         Variables:
           AWSENV:
             Fn::Sub: ${AWSENV}
+          DOMAIN_NAME:
+            Ref: DomainName
+          URL_API:
+            Fn::FindInMap: [DomainNameHosts, url, api]
+          URL_UI:
+            Fn::FindInMap: [DomainNameHosts, url, ui]
+          URL_AUTH:
+            Fn::FindInMap: [DomainNameHosts, url, auth]
       Events:
         Login:
           Type: Api
@@ -514,6 +536,14 @@ Resources:
         Variables:
           AWSENV:
             Fn::Sub: ${AWSENV}
+          DOMAIN_NAME:
+            Ref: DomainName
+          URL_API:
+            Fn::FindInMap: [DomainNameHosts, url, api]
+          URL_UI:
+            Fn::FindInMap: [DomainNameHosts, url, ui]
+          URL_AUTH:
+            Fn::FindInMap: [DomainNameHosts, url, auth]
       Events:
         CreateCustomer:
           Type: Api
