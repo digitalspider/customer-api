@@ -72,14 +72,14 @@ Mappings:
       CertificateARN: arn:aws:acm:ap-southeast-2:767397774377:certificate/b5ec5fcb-6e43-428d-bf51-fa45fe6e4f9c
 
 Resources:
-  #BEGIN: Security group
+  #BEGIN: Security groups
   CustomerSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Customer APIs SG
       SecurityGroupIngress:
         - IpProtocol: -1
-          SourcePrefixListId: pl-62a5400b
+          SourcePrefixListId: pl-62a5400b # DynamoDB vpce prefixList
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 80
@@ -90,7 +90,27 @@ Resources:
           ToPort: 443
           CidrIp: 0.0.0.0/0
         - IpProtocol: -1
-          DestinationPrefixListId: pl-62a5400b
+          DestinationPrefixListId: pl-62a5400b # DynamoDB vpce prefixList
+      VpcId:
+        Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
+  VPCEndpointSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: VPC Endpoint SG
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
       VpcId:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
   #END: Security group
@@ -342,6 +362,9 @@ Resources:
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet2:1}}"
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet3:1}}"
       VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - Ref: VPCEndpointSG
       VpcId:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
   CustomerSecrets:
