@@ -280,7 +280,7 @@ Resources:
                 Resource:
                   - Fn::Join:
                     - ''
-                    - - Fn::GetAtt: CustomerSecrets.Arn
+                    - - Fn::GetAtt: CustomerSecrets.Id
                       - '*'
         - PolicyName:
             Fn::Sub: auth-DynamoDBItemAccess-${AWSENV}
@@ -357,7 +357,7 @@ Resources:
                 Resource:
                   - Fn::Join:
                     - ''
-                    - - Fn::GetAtt: CustomerSecrets.Arn
+                    - - Fn::GetAtt: CustomerSecrets.Id
                       - '*'
         - PolicyName:
             Fn::Sub: customer-DynamoDBItemAccess-${AWSENV}

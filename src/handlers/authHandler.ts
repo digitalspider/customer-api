@@ -39,7 +39,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           data = { token };
         } else if (path.endsWith('/signup')) {
           // const authData = await validateBasicAuth(event); // TODO: extra security
-          const { username, tenantId } = body;
+          const { username } = body;
           const existingUser = username ? (await getItem(username)) : undefined;
           if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
           const user = await createItem(body as Auth);
