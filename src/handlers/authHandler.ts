@@ -101,7 +101,7 @@ async function validateBasicAuth(event: APIGatewayProxyEvent): Promise<Auth> {
 }
 
 function extractTokenFromHeaders(headers: APIGatewayProxyEventHeaders, expectedScheme?: string) {
-  const authHeader = headers['authorization'] || headers['Authorization'];
+  const authHeader = headers ? headers['authorization'] || headers['Authorization'] : undefined;
   if (!authHeader) {
     throw new CustomAxiosError('Invalid JWT token', { status: Unauthorized });
   }
