@@ -381,9 +381,14 @@ Resources:
     Properties:
       ServiceName:
         Fn::Sub: com.amazonaws.${AWS::Region}.dynamodb
-      RouteTableIds: 
-        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/routetable:1}}"
-      VpcEndpointType: Gateway
+      VpcEndpointType: Interface
+      SubnetIds: 
+        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet1:1}}"
+        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet2:1}}"
+        - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet3:1}}"
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - Ref: VPCEndpointSG
       VpcId:
         Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/id:1}}"
   AuthTable:
