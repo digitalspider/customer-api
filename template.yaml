@@ -278,7 +278,10 @@ Resources:
                 Action:
                   - secretsmanager:GetSecretValue
                 Resource:
-                  - Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:secrets-${AWSENV}*
+                  - Fn::Join:
+                    - ''
+                    - - Fn::GetAtt: CustomerSecrets.Arn
+                      - '*'
         - PolicyName:
             Fn::Sub: auth-DynamoDBItemAccess-${AWSENV}
           PolicyDocument:
@@ -294,7 +297,27 @@ Resources:
                   - dynamodb:Scan
                 Resource:
                   - Fn::GetAtt: AuthTable.Arn
-                  - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/auth-${AWSENV}/index/*
+                  - Fn::Join:
+                    - ''
+                    - - Fn::GetAtt: AuthTable.Arn
+                      - /index/*
+        - PolicyName:
+            Fn::Sub: customer-DynamoDBItemAccess-${AWSENV}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:UpdateItem
+                Resource:
+                  - Fn::GetAtt: CustomerTable.Arn
+                  - Fn::Join:
+                    - ''
+                    - - Fn::GetAtt: CustomerTable.Arn
+                      - /index/*
   CustomerLambdaIAMRole:
     Type: AWS::IAM::Role
     Properties:
@@ -332,7 +355,10 @@ Resources:
                 Action:
                   - secretsmanager:GetSecretValue
                 Resource:
-                  - Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:secrets-${AWSENV}*
+                  - Fn::Join:
+                    - ''
+                    - - Fn::GetAtt: CustomerSecrets.Arn
+                      - '*'
         - PolicyName:
             Fn::Sub: customer-DynamoDBItemAccess-${AWSENV}
           PolicyDocument:
@@ -348,7 +374,10 @@ Resources:
                   - dynamodb:Scan
                 Resource:
                   - Fn::GetAtt: CustomerTable.Arn
-                  - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/customers-${AWSENV}/index/*
+                  - Fn::Join:
+                    - ''
+                    - - Fn::GetAtt: CustomerTable.Arn
+                      - /index/*
   #END: IAM Role
 
   #BEGIN: Secrets
