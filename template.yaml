@@ -620,6 +620,36 @@ Resources:
       RetentionPolicy: Delete
   #END: Lambda Layers
 
+  #BEGIN: Lambda LogGroups
+  LambdaRequestAuthorizerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Join:
+          - ''
+          - - /aws/lambda/
+            - Ref: LambdaRequestAuthorizer
+      RetentionInDays: 30
+  AuthApiFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Join:
+          - ''
+          - - /aws/lambda/
+            - Ref: AuthApiFunction
+      RetentionInDays: 30
+  CustomerApiFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Join:
+          - ''
+          - - /aws/lambda/
+            - Ref: CustomerApiFunction
+      RetentionInDays: 30
+  #END: Lambda LogGroups
+
 Outputs:
   CustomerApi:
     Description: URL of the API endpoint
