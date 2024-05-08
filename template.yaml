@@ -386,7 +386,7 @@ Resources:
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet1:1}}"
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet2:1}}"
         - Fn::Sub: "{{resolve:ssm:/${AWSENV}/vpc/subnet3:1}}"
-      PrivateDnsEnabled: true
+      PrivateDnsEnabled: false
       SecurityGroupIds:
         - Ref: VPCEndpointSG
       VpcId:
