@@ -457,8 +457,8 @@ Resources:
       CodeUri: src/authorizer/
       Handler: authorize.handleEvent
       Tracing: Active
-      # Layers:
-      #   - Ref: RuntimeDependenciesLayer
+      Layers:
+        - Ref: RuntimeDependenciesLayer
       Environment:
         Variables:
           AWSENV:
