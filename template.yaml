@@ -419,7 +419,7 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName:
-        Fn::Sub: auth-${AWSENV}
+        Fn::Sub: auth-${AWSENV}-temp
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: userId
