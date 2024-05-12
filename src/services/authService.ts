@@ -7,9 +7,9 @@ import { getSecret } from './aws/secretService';
 import * as dynamo from './dynamo/auth';
 
 export function mapAuthToToken(authData: Auth): JwtPayload {
-  const { username, tenantId, context } = authData;
+  const { userId, tenantId, context } = authData;
   return {
-    sub: username,
+    sub: userId,
     aud: tenantId,
     context,
   };
@@ -64,24 +64,24 @@ export async function listItems(): Promise<Auth[]> {
   return dynamo.listItems();
 }
 
-export async function getItem(username: string): Promise<Auth> {
-  const item = { username };
+export async function getItem(userId: string): Promise<Auth> {
+  const item = { userId };
   return dynamo.getItem(item);
 }
 
 export async function createItem(auth: Auth): Promise<Auth> {
-  const { username = uuidv4(), password = uuidv4(), tenantId = 'default', expiryInSec = 3600, ...userData } = auth;
-  const item = { username, password, tenantId, expiryInSec, ...userData };
+  const { userId = uuidv4(), password = uuidv4(), tenantId = 'default', expiryInSec = 3600, ...userData } = auth;
+  const item = { userId, password, tenantId, expiryInSec, ...userData };
   return dynamo.createItem(item);
 }
 
-export async function updateItem(username: string, auth: Auth): Promise<Auth> {
-  const item = { username, ...cleanInput(auth) };
+export async function updateItem(userId: string, auth: Auth): Promise<Auth> {
+  const item = { userId, ...cleanInput(auth) };
   return dynamo.updateItem(item);
 }
 
-export async function deleteItem(username: string): Promise<void> {
-  const item = { username };
+export async function deleteItem(userId: string): Promise<void> {
+  const item = { userId };
   return dynamo.deleteItem(item);
 }
 

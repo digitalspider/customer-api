@@ -13,19 +13,20 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
   const { httpMethod, path, body: bodyString, requestContext, pathParameters } = event;
   const { awsRequestId } = context;
   const { authorizer } = requestContext || {};
-  const { tenantId } = authorizer || {};
+  const { tenantId, username, userId } = authorizer || {};
   const { uuid: objectId } = pathParameters || {};
   const body = bodyString ? JSON.parse(bodyString) : undefined;
-  body &&
-    console.debug('request', {
-      handler: 'appHandler',
-      httpMethod,
-      path,
-      awsRequestId,
-      tenantId,
-      objectId,
-      body,
-    });
+  console.debug('request', {
+    handler: 'appHandler',
+    httpMethod,
+    path,
+    awsRequestId,
+    tenantId,
+    objectId,
+    username,
+    userId,
+    body,
+  });
 
   try {
     let result;
@@ -35,7 +36,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           result = await handleList(tenantId);
         } else {
           if (!objectId) throw new CustomAxiosError('Cannot get customer without a customerId', { status: BadRequest });
-          result = await handleGet(tenantId, objectId);
+          result = await handleGet(tenantId, objectId, userId);
         }
         break;
       case POST:
@@ -79,8 +80,8 @@ export async function handleList(tenantId: string): Promise<Customer[]> {
   return result || [];
 }
 
-export async function handleGet(tenantId: string, customerId: string): Promise<Customer> {
-  const result = await getCustomer(tenantId, customerId);
+export async function handleGet(tenantId: string, objectId: string, userId: string): Promise<Customer> {
+  const result = await getCustomer(tenantId, userId);
   return result || {};
 }
 

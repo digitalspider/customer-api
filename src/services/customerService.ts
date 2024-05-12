@@ -13,12 +13,16 @@ export async function getCustomer(tenantId: string, id: string): Promise<Custome
   return result;
 }
 
-export async function createCustomer(tenantId: string, customer: Customer): Promise<Customer> {
-  const item = { tenantId, id: uuidv4(), ...cleanInput(customer) };
+export async function createCustomer(customer: Customer): Promise<Customer> {
+  const { id = uuidv4(), tenantId = 'default' } = customer;
+  const item = { tenantId, id, ...cleanInput(customer) };
   return dynamo.createItem(item);
 }
 
-export async function updateCustomer(tenantId: string, id: string, customer: Customer): Promise<Customer> {
+export async function updateCustomer(customer: Customer): Promise<Customer> {
+  const { id, tenantId = 'default' } = customer;
+  if (!id) throw new Error('Cannot update customer without required properties: id');
+  if (!tenantId) throw new Error('Cannot update customer without required properties: tenantId');
   const item = { tenantId, id, ...cleanInput(customer) };
   return dynamo.updateItem(item);
 }

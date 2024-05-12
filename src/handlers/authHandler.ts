@@ -38,17 +38,20 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           const token = await handleCreateJwt(body as LoginInput);
           data = { token };
         } else if (path.endsWith('/signup')) {
-          const { username } = body;
+          const { tenantId, username } = body;
           const existingUser = username ? (await getItem(username)) : undefined;
           if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
           body.password = hash(body.password);
-          const user = await createItem(body as Auth);
+          const userId = '';
+          const userData: Auth = { tenantId, userId, password: body.password, context: { username: username }};
+          const user = await createItem(userData);
           if (!user) throw new CustomAxiosError('Failed to create new user', { status: BadRequest, data: { username } });
           if (!user.tenantId) throw new CustomAxiosError('Failed to set tenantId for user', { status: BadRequest, data: { username } });
           const { password, ...safeBody } = body; // remove password from body
-          const customer = await createCustomer(user.tenantId, safeBody as Customer);
+          const customer = await createCustomer({ tenantId, ...safeBody } as Customer);
           if (!customer) throw new CustomAxiosError('Failed to create new customer', { status: BadRequest, data: { username } });
-          const token = await handleCreateJwt(user as LoginInput);
+          if (!customer.id) throw new CustomAxiosError('Failed to get customerId', { status: BadRequest, data: { username, customer } });
+          const token = await handleCreateJwt({ username, password } as LoginInput);
           data = { token };
         }
         break;
@@ -76,14 +79,15 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
 
 async function handleCreateJwt(input: LoginInput): Promise<string> {
   const { username: usernameInput, password: passwordInput } = input || {};
-  const user = await getItem(usernameInput);
+  const userId = usernameInput; // TODO: How do I do this?
+  const user = await getItem(userId);
   console.debug('got user', { user });
-  const { username, password, tenantId, expiryInSec } = user || {};
+  const { password, tenantId, expiryInSec } = user || {};
   if (!user || hash(passwordInput) !== password) {
     throw new CustomAxiosError('Username or password is invalid', { status: Unauthorized });
   }
   if (!tenantId) {
-    throw new CustomAxiosError(`The user ${username} has not been configured`, { status: InternalServerError });
+    throw new CustomAxiosError(`The user ${userId} has not been configured`, { status: InternalServerError });
   }
   const payload = mapAuthToToken(user);
   return createJwt(payload, undefined, expiryInSec);

@@ -8,7 +8,7 @@ export type LoginInput = {
 };
 
 export type Auth = {
-  username: string;
+  userId: string;
   password?: string;
   tenantId?: string;
   expiryInSec?: number;
