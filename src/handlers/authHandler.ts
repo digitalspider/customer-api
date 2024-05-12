@@ -43,7 +43,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
           body.password = hash(body.password);
           const userId = '';
-          const userData: Auth = { tenantId, userId, password: body.password, context: { username: username }};
+          const userData: Auth = { tenantId, userId, password: body.password, username };
           const user = await createItem(userData);
           if (!user) throw new CustomAxiosError('Failed to create new user', { status: BadRequest, data: { username } });
           if (!user.tenantId) throw new CustomAxiosError('Failed to set tenantId for user', { status: BadRequest, data: { username } });
