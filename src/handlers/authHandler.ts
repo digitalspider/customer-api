@@ -1,13 +1,13 @@
 import { APIGatewayProxyEvent, APIGatewayProxyEventHeaders, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { HttpStatusCode } from 'axios';
+import { createHash } from 'node:crypto';
 import { HTTP_METHOD } from '../common/constants';
-import { createJwt, extractToken, getItem, mapAuthToToken, verifyToken, createItem } from '../services/authService';
+import { createItem, createJwt, extractToken, getItem, getItemByUsername, mapAuthToToken, verifyToken } from '../services/authService';
+import { createCustomer } from '../services/customerService';
 import { createResponse } from '../services/utils';
 import { Auth, LoginInput } from '../types/auth';
-import { CustomAxiosError } from '../types/error';
-import { createCustomer } from '../services/customerService';
 import { Customer } from '../types/customer';
-import { createHash } from 'node:crypto';
+import { CustomAxiosError } from '../types/error';
 
 const { Ok, BadRequest, InternalServerError, MethodNotAllowed, Unauthorized } = HttpStatusCode;
 const { GET, POST } = HTTP_METHOD;
@@ -39,7 +39,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           data = { token };
         } else if (path.endsWith('/signup')) {
           const { tenantId, username } = body;
-          const existingUser = username ? (await getItem(username)) : undefined;
+          const existingUser = username ? (await getItemByUsername(username)) : undefined;
           if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
           body.password = hash(body.password);
           const userId = '';

@@ -69,6 +69,11 @@ export async function getItem(userId: string): Promise<Auth> {
   return dynamo.getItem(item);
 }
 
+export async function getItemByUsername(username: string): Promise<Auth> {
+  const item = { userId: username }; // TODO: change to query
+  return dynamo.getItem(item);
+}
+
 export async function createItem(auth: Auth): Promise<Auth> {
   const { userId = uuidv4(), password = uuidv4(), tenantId = 'default', expiryInSec = 3600, ...userData } = auth;
   const item = { userId, password, tenantId, expiryInSec, ...userData };
