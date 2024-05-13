@@ -5,6 +5,7 @@ export interface Context {
 export type LoginInput = {
   username: string;
   password: string;
+  expiryInSec?: number;
 };
 
 export type Auth = {

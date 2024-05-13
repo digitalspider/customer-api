@@ -38,11 +38,10 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           const token = await handleCreateJwt(body as LoginInput);
           data = { token };
         } else if (path.endsWith('/signup')) {
-          const { tenantId, username, expiryInSec: expiryInSecInput } = body;
+          const { tenantId, username, expiryInSec } = body;
           const existingUser = username ? (await getItemByUsername(username)) : undefined;
           if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
           body.password = hash(body.password);
-          const expiryInSec = expiryInSecInput && !isNaN(expiryInSecInput) ? Math.max(1, Math.min(3600, parseInt(expiryInSecInput, 10))) : undefined;
           const userData: Auth = { tenantId, userId: '', password: body.password, username, expiryInSec };
           const user = await createItem(userData);
           if (!user) throw new CustomAxiosError('Failed to create new user', { status: BadRequest, data: { username } });
@@ -52,7 +51,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           const customer = await createCustomer({ ...safeBody, tenantId, createdBy: userId } as Customer);
           if (!customer) throw new CustomAxiosError('Failed to create new customer', { status: BadRequest, data: { username } });
           if (!customer.id) throw new CustomAxiosError('Failed to get customerId', { status: BadRequest, data: { username, customer } });
-          const token = await handleCreateJwt({ username, password } as LoginInput);
+          const token = await handleCreateJwt({ username, password, expiryInSec } as LoginInput);
           data = { token };
         }
         break;
@@ -79,10 +78,10 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
 }
 
 async function handleCreateJwt(input: LoginInput): Promise<string> {
-  const { username, password: passwordInput } = input || {};
+  const { username, password: passwordInput, expiryInSec: expiryInSecInput } = input || {};
   const user = username ? (await getItemByUsername(username)) : undefined;
   console.debug('got user', { user });
-  const { password, tenantId, expiryInSec } = user || {};
+  const { password, tenantId } = user || {};
   if (!user || hash(passwordInput) !== password) {
     throw new CustomAxiosError('Username or password is invalid', { status: Unauthorized });
   }
@@ -90,6 +89,7 @@ async function handleCreateJwt(input: LoginInput): Promise<string> {
     throw new CustomAxiosError(`The user ${user.username} has not been configured`, { status: InternalServerError });
   }
   const payload = mapAuthToToken(user);
+  const expiryInSec = expiryInSecInput && !isNaN(expiryInSecInput) ? Math.max(1, Math.min(24*3600, expiryInSecInput)) : undefined;
   return createJwt(payload, undefined, expiryInSec);
 }
 
