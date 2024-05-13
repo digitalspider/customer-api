@@ -41,7 +41,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
         break;
       case POST:
         if (path.endsWith('/')) {
-          result = await handleCreate(tenantId, body as Customer);
+          result = await handleCreate({ ...body, tenantId, createdBy: userId }  as Customer);
         }
         break;
       default:
@@ -85,7 +85,7 @@ export async function handleGet(tenantId: string, objectId: string, userId: stri
   return result || {};
 }
 
-export async function handleCreate(tenantId: string, customer: Customer): Promise<Customer> {
-  const result = await createCustomer(tenantId, customer);
+export async function handleCreate(customer: Customer): Promise<Customer> {
+  const result = await createCustomer(customer);
   return result || {};
 }

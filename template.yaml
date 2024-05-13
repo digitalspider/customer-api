@@ -430,11 +430,14 @@ Resources:
         - AttributeName: userId
           KeyType: HASH
       GlobalSecondaryIndexes:
-        - IndexName:
-            Fn::Sub: auth-index-username
+        - IndexName: username-index
           KeySchema:
             - AttributeName: username
               KeyType: HASH
+          ProvisionedThroughput:
+            ReadCapacityUnits: 10
+            WriteCapacityUnits: 5
+          ProjectionType: ALL
   CustomerTable:
     Type: AWS::DynamoDB::Table
     Properties:

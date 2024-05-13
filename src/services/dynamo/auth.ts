@@ -13,8 +13,8 @@ type KeyValue = {
 };
 
 function getDynamoKey(keys: Item) {
-  const { username } = keys;
-  return { username };
+  const { userId } = keys;
+  return { userId };
 }
 
 export async function createItem(item: Item): Promise<Item> {
@@ -43,6 +43,9 @@ export async function updateItem(item: Item): Promise<Item> {
   }
   if (expiryInSec !== undefined && expiryInSec !== null) {
     updates.push({ name: 'expiryInSec', value: expiryInSec });
+  }
+  if (expiryInSec !== undefined && expiryInSec !== null) {
+    updates.push({ name: 'username', value: expiryInSec });
   }
 
   const { UpdateExpression, ExpressionAttributeValues } = getDynamoUpdateExpressions(updates);

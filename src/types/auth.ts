@@ -10,6 +10,7 @@ export type LoginInput = {
 export type Auth = {
   userId: string;
   password?: string;
+  username?: string;
   tenantId?: string;
   expiryInSec?: number;
   context?: Context;

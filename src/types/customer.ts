@@ -10,6 +10,7 @@ export type Customer = {
   deviceOs?: string;
   encrypted?: string;
   status?: Status;
+  createdBy?: string;
 };
 
 export type Status = 'pending' | 'approved' | 'declined';

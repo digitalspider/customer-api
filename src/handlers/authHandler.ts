@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyEventHeaders, APIGatewayProxyResul
 import { HttpStatusCode } from 'axios';
 import { createHash } from 'node:crypto';
 import { HTTP_METHOD } from '../common/constants';
-import { createItem, createJwt, extractToken, getItem, getItemByUsername, mapAuthToToken, verifyToken } from '../services/authService';
+import { createItem, createJwt, extractToken, getItemByUsername, mapAuthToToken, verifyToken } from '../services/authService';
 import { createCustomer } from '../services/customerService';
 import { createResponse } from '../services/utils';
 import { Auth, LoginInput } from '../types/auth';
@@ -38,17 +38,18 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           const token = await handleCreateJwt(body as LoginInput);
           data = { token };
         } else if (path.endsWith('/signup')) {
-          const { tenantId, username } = body;
+          const { tenantId, username, expiryInSec: expiryInSecInput } = body;
           const existingUser = username ? (await getItemByUsername(username)) : undefined;
           if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
           body.password = hash(body.password);
-          const userId = '';
-          const userData: Auth = { tenantId, userId, password: body.password, username };
+          const expiryInSec = expiryInSecInput && !isNaN(expiryInSecInput) ? Math.max(1, Math.min(3600, parseInt(expiryInSecInput, 10))) : undefined;
+          const userData: Auth = { tenantId, userId: '', password: body.password, username, expiryInSec };
           const user = await createItem(userData);
           if (!user) throw new CustomAxiosError('Failed to create new user', { status: BadRequest, data: { username } });
           if (!user.tenantId) throw new CustomAxiosError('Failed to set tenantId for user', { status: BadRequest, data: { username } });
+          const { userId } = user;
           const { password, ...safeBody } = body; // remove password from body
-          const customer = await createCustomer({ tenantId, ...safeBody } as Customer);
+          const customer = await createCustomer({ ...safeBody, tenantId, createdBy: userId } as Customer);
           if (!customer) throw new CustomAxiosError('Failed to create new customer', { status: BadRequest, data: { username } });
           if (!customer.id) throw new CustomAxiosError('Failed to get customerId', { status: BadRequest, data: { username, customer } });
           const token = await handleCreateJwt({ username, password } as LoginInput);
@@ -78,16 +79,15 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
 }
 
 async function handleCreateJwt(input: LoginInput): Promise<string> {
-  const { username: usernameInput, password: passwordInput } = input || {};
-  const userId = usernameInput; // TODO: How do I do this?
-  const user = await getItem(userId);
+  const { username, password: passwordInput } = input || {};
+  const user = username ? (await getItemByUsername(username)) : undefined;
   console.debug('got user', { user });
   const { password, tenantId, expiryInSec } = user || {};
   if (!user || hash(passwordInput) !== password) {
     throw new CustomAxiosError('Username or password is invalid', { status: Unauthorized });
   }
   if (!tenantId) {
-    throw new CustomAxiosError(`The user ${userId} has not been configured`, { status: InternalServerError });
+    throw new CustomAxiosError(`The user ${user.username} has not been configured`, { status: InternalServerError });
   }
   const payload = mapAuthToToken(user);
   return createJwt(payload, undefined, expiryInSec);
