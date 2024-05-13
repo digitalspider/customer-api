@@ -419,14 +419,22 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName:
-        Fn::Sub: auth-${AWSENV}-temp
+        Fn::Sub: auth-${AWSENV}
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: userId
           AttributeType: S
+        - AttributeName: username
+          AttributeType: S
       KeySchema:
         - AttributeName: userId
           KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName:
+            Fn::Sub: auth-index-username
+          KeySchema:
+            - AttributeName: username
+              KeyType: HASH
   CustomerTable:
     Type: AWS::DynamoDB::Table
     Properties:
