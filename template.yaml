@@ -434,11 +434,11 @@ Resources:
           KeySchema:
             - AttributeName: username
               KeyType: HASH
+          Projection:
+            ProjectionType: KEYS_ONLY
           ProvisionedThroughput:
             ReadCapacityUnits: 10
             WriteCapacityUnits: 5
-          Projection:
-            ProjectionType: KEYS_ONLY
   CustomerTable:
     Type: AWS::DynamoDB::Table
     Properties:
