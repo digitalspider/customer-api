@@ -136,9 +136,10 @@ export async function update(input: UpdateCommandInput): Promise<UpdateCommandOu
     FilterExpression: 'contains (Subtitle, :topic)',
  */
 export async function query(input: QueryCommandInput): Promise<QueryCommandOutput> {
-  const { TableName, ExpressionAttributeValues, KeyConditionExpression, FilterExpression } = input || {};
+  const { TableName, IndexName, ExpressionAttributeValues, KeyConditionExpression, FilterExpression } = input || {};
   const params = {
     TableName,
+    IndexName,
     ExpressionAttributeValues,
     // Specifies the values that define the range of the retrieved items. In this case, items in Season 2 before episode 9.
     KeyConditionExpression,

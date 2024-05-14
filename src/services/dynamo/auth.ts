@@ -1,7 +1,7 @@
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { AWSENV } from '../../common/config';
 import { Auth } from '../../types/auth';
-import { create, deleteItem as _delete, get, scan, update } from '../aws/dynamoService';
+import { create, deleteItem as _delete, get, scan, update, query } from '../aws/dynamoService';
 
 const TABLE_NAME = `auth-${AWSENV}`;
 
@@ -114,6 +114,17 @@ function getFilterExpression(inputs: { [key: string]: string }) {
 export async function searchItems(filter: { [key: string]: string }): Promise<Item[]> {
   const response = await scan({
     TableName: TABLE_NAME,
+    ...getFilterExpression(filter),
+  });
+
+  const items = response.Items || [];
+  return items.map((item) => unmarshall(item)) as Item[];
+}
+
+export async function queryIndex(IndexName: string, filter: { [key: string]: string }): Promise<Item[]> {
+  const response = await query({
+    TableName: TABLE_NAME,
+    IndexName,
     ...getFilterExpression(filter),
   });
 

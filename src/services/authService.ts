@@ -69,9 +69,11 @@ export async function getItem(userId: string): Promise<Auth> {
   return dynamo.getItem(item);
 }
 
-export async function getItemByUsername(username: string): Promise<Auth> {
-  const item = { userId: username }; // TODO: change to query
-  return dynamo.getItem(item);
+export async function getItemByUsername(username: string): Promise<Auth|undefined> {
+  const indexName = 'username-index';
+  const users = await dynamo.queryIndex(indexName, { username });
+  const user = users?.length ? users[0] : undefined;
+  return user;
 }
 
 export async function createItem(auth: Auth): Promise<Auth> {
