@@ -77,7 +77,7 @@ export async function getItemByUsername(username: string): Promise<Auth|undefine
   return users?.length ? users[0] : undefined;
 }
 
-export async function createItem(auth: Auth): Promise<Auth> {
+export async function createItem(auth: Partial<Auth>): Promise<Auth> {
   const { userId = uuidv4(), password = uuidv4(), tenantId = 'default', expiryInSec = 3600, ...userData } = auth;
   const item = { userId, password, tenantId, expiryInSec, ...userData };
   console.debug('creating item: '+JSON.stringify(item));
