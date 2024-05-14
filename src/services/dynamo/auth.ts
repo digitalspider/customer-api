@@ -121,11 +121,12 @@ export async function searchItems(filter: { [key: string]: string }): Promise<It
   return items.map((item) => unmarshall(item)) as Item[];
 }
 
-export async function queryIndex(IndexName: string, filter: { [key: string]: string }): Promise<Item[]> {
+export async function queryIndex(IndexName: string, KeyConditionExpression: string, ExpressionAttributeValues: Record<string, any>): Promise<Item[]> {
   const response = await query({
     TableName: TABLE_NAME,
     IndexName,
-    ...getFilterExpression(filter),
+    KeyConditionExpression,
+    ExpressionAttributeValues,
   });
 
   const items = response.Items || [];

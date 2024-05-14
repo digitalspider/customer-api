@@ -70,10 +70,11 @@ export async function getItem(userId: string): Promise<Auth> {
 }
 
 export async function getItemByUsername(username: string): Promise<Auth|undefined> {
-  const indexName = 'username-index';
-  const users = await dynamo.queryIndex(indexName, { username });
-  const user = users?.length ? users[0] : undefined;
-  return user;
+  const indexName = 'username-index'
+  const KeyConditionExpression = 'username = :username';
+  const ExpressionAttributeValues = { ':username': username };
+  const users = await dynamo.queryIndex(indexName, KeyConditionExpression, ExpressionAttributeValues);
+  return users?.length ? users[0] : undefined;
 }
 
 export async function createItem(auth: Auth): Promise<Auth> {
