@@ -436,9 +436,6 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: KEYS_ONLY
-          ProvisionedThroughput:
-            ReadCapacityUnits: 10
-            WriteCapacityUnits: 5
   CustomerTable:
     Type: AWS::DynamoDB::Table
     Properties:
