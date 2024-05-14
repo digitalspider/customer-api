@@ -146,6 +146,7 @@ export async function query(input: QueryCommandInput): Promise<QueryCommandOutpu
     // Filter that returns only episodes that meet previous criteria and have the subtitle 'The Return'
     FilterExpression,
   };
+  console.debug('params: '+ params);
   const data = await ddbDocClient.send(new QueryCommand(params));
   // console.debug('Success. Item details: ', data);
   // console.debug('Success. Item details: ', data.Items);
