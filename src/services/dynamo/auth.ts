@@ -129,8 +129,7 @@ export async function queryIndex(IndexName: string, KeyConditionExpression: stri
     ExpressionAttributeValues,
   });
 
-  console.debug('response='+JSON.stringify(response));
   const items = response.Items || [];
-  console.debug('items='+JSON.stringify(items));
-  return items.map((item) => unmarshall(item)) as Item[];
+  // return items.map((item) => unmarshall(item)) as Item[];
+  return items.map((item) => item) as Item[];
 }
