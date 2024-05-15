@@ -89,7 +89,8 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           }
           default:
             throw new CustomAxiosError(`Invalid path: ${path}`, { status: BadRequest });
-      }
+        }
+        break;
       default:
         throw new CustomAxiosError(`${httpMethod} ${path} is not a valid endpoint`, { status: MethodNotAllowed });
     }
