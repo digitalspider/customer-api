@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda
 import { HttpStatusCode } from 'axios';
 import { HTTP_METHOD } from '../common/constants';
 import { createCustomer, getCustomer, listCustomers } from '../services/customerService';
-import { createResponse } from '../services/utils';
+import { createResponse, parsePath } from '../services/utils';
 import { Customer } from '../types/customer';
 import { CustomAxiosError } from '../types/error';
 
@@ -16,6 +16,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
   const { tenantId, username, userId } = authorizer || {};
   const { uuid: objectId } = pathParameters || {};
   const body = bodyString ? JSON.parse(bodyString) : undefined;
+  const { pathParts, pathFirst } = parsePath(path, 'customer');
   console.debug('request', {
     handler: 'appHandler',
     httpMethod,
@@ -25,6 +26,8 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
     objectId,
     username,
     userId,
+    pathFirst,
+    pathParts,
     body,
   });
 

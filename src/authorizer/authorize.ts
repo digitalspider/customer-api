@@ -6,6 +6,7 @@ import {
 } from 'aws-lambda';
 import { JwtPayload } from 'jsonwebtoken';
 import { extractToken, verifyToken } from '../services/authService';
+import { getItem } from '../services/dynamo/auth';
 
 type Effect = 'Allow' | 'Deny';
 
@@ -45,9 +46,15 @@ export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Prom
   }
   const { sub: principalId, aud: tenantId, context } = tokenData || {};
   if (principalId) {
-    console.log(`Authorization approved. principalId=${principalId}, tenantId=${tenantId}`);
+    console.log(`Authorization valid. principalId=${principalId}, tenantId=${tenantId}`);
+    const { username } = await getItem({ userId: principalId });
+    if (!username) {
+      console.error(`Cannot find auth, by userId: ${principalId}`);
+      return generatePolicy(principalId, 'Deny', methodArn);
+    }
     return generatePolicy(principalId, 'Allow', methodArn, {
       ...context,
+      username,
       userId: principalId,
       tenantId,
     });

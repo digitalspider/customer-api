@@ -26,9 +26,9 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
     path,
     awsRequestId,
     headers,
-    body,
     pathFirst,
     pathParts,
+    body,
   });
 
   try {

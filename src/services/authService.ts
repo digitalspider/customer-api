@@ -7,11 +7,10 @@ import { getSecret } from './aws/secretService';
 import * as dynamo from './dynamo/auth';
 
 export function mapAuthToToken(authData: Auth): JwtPayload {
-  const { userId, tenantId, expiryInSec, context } = authData;
+  const { userId, tenantId, context } = authData;
   return {
     sub: userId,
     aud: tenantId,
-    exp: expiryInSec ? Math.floor(new Date().getTime()/1000) + expiryInSec : undefined,
     context,
   };
 }
@@ -79,7 +78,7 @@ export async function getItemByUsername(username: string): Promise<Auth|undefine
 }
 
 export async function createItem(auth: Partial<Auth>): Promise<Auth> {
-  const { userId = uuidv4(), password = uuidv4(), tenantId = 'default', expiryInSec = 3600, ...userData } = auth;
+  const { userId = uuidv4(), password = uuidv4(), tenantId = 'default', expiryInSec, ...userData } = auth;
   const item = { userId, password, tenantId, expiryInSec, ...userData };
   console.debug('creating item: '+JSON.stringify(item));
   return dynamo.createItem(item);
