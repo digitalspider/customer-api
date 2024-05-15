@@ -435,7 +435,7 @@ Resources:
             - AttributeName: username
               KeyType: HASH
           Projection:
-            ProjectionType: KEYS_ONLY
+            ProjectionType: ALL
   CustomerTable:
     Type: AWS::DynamoDB::Table
     Properties:
