@@ -429,13 +429,6 @@ Resources:
       KeySchema:
         - AttributeName: userId
           KeyType: HASH
-      GlobalSecondaryIndexes:
-        - IndexName: username-index
-          KeySchema:
-            - AttributeName: username
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
   CustomerTable:
     Type: AWS::DynamoDB::Table
     Properties:
