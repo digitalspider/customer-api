@@ -76,6 +76,10 @@ function generatePolicy(
 
   authResponse.principalId = principalId;
   if (effect && resource) {
+    if (typeof(resource) === 'string') {
+      // const methodArn = 'arn:aws:execute-api:ap-southeast-2:767397774377:kejru1prkg/v1/GET/customer/9f6780ea-a8c7-44bb-a302-e63b545b383b';
+      resource = resource.split('/')[0] + '/*/*';
+    }
     const policyDocument: PolicyDocument = {
       Version: '2012-10-17',
       Statement: [
