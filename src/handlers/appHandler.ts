@@ -7,7 +7,7 @@ import { Customer } from '../types/customer';
 import { CustomAxiosError } from '../types/error';
 
 const { Ok, MethodNotAllowed, InternalServerError, BadRequest } = HttpStatusCode;
-const { GET, POST } = HTTP_METHOD;
+const { GET, POST, PUT, DELETE } = HTTP_METHOD;
 
 export async function handleEvent(event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> {
   const { httpMethod, path, body: bodyString, requestContext, pathParameters } = event;
@@ -16,7 +16,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
   const { tenantId, username, userId } = authorizer || {};
   const { uuid: objectId } = pathParameters || {};
   const body = bodyString ? JSON.parse(bodyString) : undefined;
-  const { pathParts, pathFirst } = parsePath(path, 'customer');
+  const { pathParts, pathFirst } = parsePath(path);
   console.debug('request', {
     handler: 'appHandler',
     httpMethod,
@@ -43,9 +43,15 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
         }
         break;
       case POST:
-        if (path.endsWith('/')) {
+        if (path.endsWith('/customer')) {
           result = await handleCreate({ ...body, tenantId, createdBy: userId }  as Customer);
         }
+        break;
+      case PUT:
+        result = "TODO";
+        break;
+      case DELETE:
+        result = "TODO";
         break;
       default:
         throw new CustomAxiosError('Invalid request', { status: MethodNotAllowed });
