@@ -14,6 +14,8 @@ export type Auth = {
   username?: string;
   tenantId?: string;
   expiryInSec?: number;
+  email?: string;
+  mobile?: string;
   context?: Context;
   [x: string]: any; // eslint-disable-line
 };

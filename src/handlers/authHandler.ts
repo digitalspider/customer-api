@@ -46,11 +46,12 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
             break;
           }
           case 'signup': {
-            const { tenantId, username, expiryInSec } = body;
+            const { tenantId, username, expiryInSec: expiryInSecInput, email, mobile } = body as Auth;
             const existingUser = username ? (await getItemByUsername(username)) : undefined;
             if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
             body.password = hash(body.password);
-            const userData: Partial<Auth> = { tenantId, password: body.password, username, expiryInSec };
+            const expiryInSec = expiryInSecInput && !isNaN(expiryInSecInput) ? Math.max(1, Math.min(24*3600, expiryInSecInput)) : undefined;
+            const userData: Partial<Auth> = { tenantId, password: body.password, username, expiryInSec, email, mobile };
             const user = await createItem(userData);
             if (!user) throw new CustomAxiosError('Failed to create new user', { status: BadRequest, data: { username } });
             if (!user.tenantId) throw new CustomAxiosError('Failed to set tenantId for user', { status: BadRequest, data: { username } });
@@ -127,7 +128,7 @@ async function handleCreateJwt(input: LoginInput): Promise<string> {
   }
   const expiryInSecIn = expiryInSecInput && !isNaN(expiryInSecInput) ? Math.max(1, Math.min(24*3600, expiryInSecInput)) : undefined;
   const expiryInSec = expiryInSecIn || expiryInSecFromUser;
-  const payload = mapAuthToToken({ ...user, expiryInSec, context: { username } });
+  const payload = mapAuthToToken({ ...user, expiryInSec });
   
   return createJwt(payload, undefined, expiryInSec);
 }
