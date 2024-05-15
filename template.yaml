@@ -424,8 +424,6 @@ Resources:
       AttributeDefinitions:
         - AttributeName: userId
           AttributeType: S
-        - AttributeName: username
-          AttributeType: S
       KeySchema:
         - AttributeName: userId
           KeyType: HASH
