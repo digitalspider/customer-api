@@ -1,7 +1,6 @@
-import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { AWSENV } from '../../common/config';
 import { Customer } from '../../types/customer';
-import { create, deleteItem as _delete, get, scan, update } from '../aws/dynamoService';
+import { create, deleteItem as _delete, get, scan, update, query } from '../aws/dynamoService';
 
 const TABLE_NAME = `customers-${AWSENV}`;
 
@@ -28,14 +27,13 @@ export async function getItem(item: Item): Promise<Item> {
 }
 
 export async function listItems(pk: string): Promise<Item[]> {
-  const response = await scan({
+  const response = await query({
     TableName: TABLE_NAME,
-    FilterExpression: '#tenantId = :tenantId',
-    ExpressionAttributeNames: { '#tenantId': 'tenantId' },
-    ExpressionAttributeValues: { ':tenantId': { S: pk } },
+    FilterExpression: 'tenantId = :tenantId',
+    ExpressionAttributeValues: { ':tenantId': { pk } },
   });
   const items = response.Items || [];
-  return items.map((item) => unmarshall(item)) as Item[];
+  return items.map((item) => (item)) as Item[];
 }
 
 export async function updateItem(item: Item): Promise<Item> {
@@ -136,5 +134,5 @@ export async function searchItems(filter: { [key: string]: string }): Promise<It
   });
 
   const items = response.Items || [];
-  return items.map((item) => unmarshall(item)) as Item[];
+  return items.map((item) => (item)) as Item[];
 }
