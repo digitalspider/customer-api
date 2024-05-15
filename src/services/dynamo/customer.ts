@@ -29,7 +29,7 @@ export async function getItem(item: Item): Promise<Item> {
 export async function listItems(pk: string): Promise<Item[]> {
   const response = await query({
     TableName: TABLE_NAME,
-    FilterExpression: 'tenantId = :tenantId',
+    KeyConditionExpression: 'tenantId = :tenantId',
     ExpressionAttributeValues: { ':tenantId': { pk } },
   });
   const items = response.Items || [];
