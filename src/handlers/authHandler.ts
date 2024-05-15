@@ -4,19 +4,22 @@ import { createHash } from 'node:crypto';
 import { HTTP_METHOD } from '../common/constants';
 import { createItem, createJwt, extractToken, getItemByUsername, mapAuthToToken, verifyToken } from '../services/authService';
 import { createCustomer } from '../services/customerService';
-import { createResponse } from '../services/utils';
+import { createResponse, parsePath } from '../services/utils';
 import { Auth, LoginInput } from '../types/auth';
 import { Customer } from '../types/customer';
 import { CustomAxiosError } from '../types/error';
+import { updateItem } from '../services/dynamo/auth';
+import { JwtPayload } from 'jsonwebtoken';
 
 const { Ok, BadRequest, InternalServerError, MethodNotAllowed, Unauthorized } = HttpStatusCode;
 const { GET, POST } = HTTP_METHOD;
 
 export async function handleEvent(event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> {
   let response: APIGatewayProxyResult;
-  const { httpMethod, path, headers, body: bodyString } = event;
+  const { httpMethod, path, headers, body: bodyString, queryStringParameters } = event;
   const { awsRequestId } = context;
   const body = bodyString ? JSON.parse(bodyString) : undefined;
+  const { pathParts, pathFirst } = parsePath(path, 'auth');
   console.debug('request', {
     handler: 'authHandler',
     httpMethod,
@@ -24,6 +27,8 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
     awsRequestId,
     headers,
     body,
+    pathFirst,
+    pathParts,
   });
 
   try {
@@ -34,27 +39,57 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
         data = await verifyToken(jwtToken);
         break;
       case POST:
-        if (path.endsWith('/login')) {
-          const token = await handleCreateJwt(body as LoginInput);
-          data = { token };
-        } else if (path.endsWith('/signup')) {
-          const { tenantId, username, expiryInSec } = body;
-          const existingUser = username ? (await getItemByUsername(username)) : undefined;
-          if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
-          body.password = hash(body.password);
-          const userData: Partial<Auth> = { tenantId, password: body.password, username, expiryInSec };
-          const user = await createItem(userData);
-          if (!user) throw new CustomAxiosError('Failed to create new user', { status: BadRequest, data: { username } });
-          if (!user.tenantId) throw new CustomAxiosError('Failed to set tenantId for user', { status: BadRequest, data: { username } });
-          const { userId } = user;
-          const { password, ...safeBody } = body; // remove password from body
-          const customer = await createCustomer({ ...safeBody, tenantId, createdBy: userId } as Customer);
-          if (!customer) throw new CustomAxiosError('Failed to create new customer', { status: BadRequest, data: { username } });
-          if (!customer.id) throw new CustomAxiosError('Failed to get customerId', { status: BadRequest, data: { username, customer } });
-          const token = await handleCreateJwt({ username, password, expiryInSec } as LoginInput);
-          data = { token };
-        }
-        break;
+        switch(pathFirst) {
+          case 'login': {
+            const token = await handleCreateJwt(body as LoginInput);
+            data = { token };
+            break;
+          }
+          case 'signup': {
+            const { tenantId, username, expiryInSec } = body;
+            const existingUser = username ? (await getItemByUsername(username)) : undefined;
+            if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
+            body.password = hash(body.password);
+            const userData: Partial<Auth> = { tenantId, password: body.password, username, expiryInSec };
+            const user = await createItem(userData);
+            if (!user) throw new CustomAxiosError('Failed to create new user', { status: BadRequest, data: { username } });
+            if (!user.tenantId) throw new CustomAxiosError('Failed to set tenantId for user', { status: BadRequest, data: { username } });
+            const { userId } = user;
+            const { password, ...safeBody } = body; // remove password from body
+            const customer = await createCustomer({ ...safeBody, tenantId, createdBy: userId } as Customer);
+            if (!customer) throw new CustomAxiosError('Failed to create new customer', { status: BadRequest, data: { username } });
+            if (!customer.id) throw new CustomAxiosError('Failed to get customerId', { status: BadRequest, data: { username, customer } });
+            const token = await handleCreateJwt({ username, password, expiryInSec } as LoginInput);
+            data = { token };
+            break;
+          }
+          case 'forgot-password': {
+            const { username } = body;
+            if (!username) throw new CustomAxiosError('Error. Missing parameter: username', { status: BadRequest });
+            const user = await getItemByUsername(username);
+            if (!user) throw new CustomAxiosError('Error. User does not exist', { status: BadRequest, data: { username } });
+            const { userId } = user;
+            const token = await createJwt({ username, userId }, '', 20*60);
+            const resetPath = `${event.path}/password/reset?token=${token}`;
+            data = { resetPath };
+            break;
+          }
+          case 'reset-password': {
+            const { newPass } = body;
+            if (!newPass) throw new CustomAxiosError('Failed to create new password. Missing parameter: newPass', { status: BadRequest });
+            const { token } = queryStringParameters || {};
+            if (!token) throw new CustomAxiosError('Failed to create new password. Missing parameter: token', { status: BadRequest });
+            const { username, userId } = (await verifyToken(token) || {}) as JwtPayload;
+            if (!username) throw new CustomAxiosError('Failed to create new password. Invalid token', { status: BadRequest });
+            await updateItem({ userId, username, password: hash(newPass) });
+            console.debug(`Update new password for user ${username}`);
+            const newJwt = await handleCreateJwt({ username, password: newPass } as LoginInput);
+            data = { token: newJwt };
+            break;
+          }
+          default:
+            throw new CustomAxiosError(`Invalid path: ${path}`, { status: BadRequest });
+      }
       default:
         throw new CustomAxiosError(`${httpMethod} ${path} is not a valid endpoint`, { status: MethodNotAllowed });
     }

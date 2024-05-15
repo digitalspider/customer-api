@@ -1,5 +1,8 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
 import { HttpStatusCode } from 'axios';
+import { CustomAxiosError } from '../types/error';
+
+const { BadRequest } = HttpStatusCode;
 
 export async function sleep(ms: number): Promise<void> {
   if (!ms) return;
@@ -42,4 +45,17 @@ export function groupSettledPromises<T>(response: PromiseSettledResult<T>[]): Pr
     errors,
     successes,
   };
+}
+
+export function parsePath(path: string, expectedPrefix?: string) {
+  if (!path) return { pathParts: [] };
+  if (path.startsWith('/')) path = path.slice(1);
+  const pathParts = path.split('/');
+  if (pathParts?.length && pathParts[0].match(/v\d+/)) { pathParts.shift() }
+  if (expectedPrefix) {
+    if (pathParts?.length && pathParts[0] !== expectedPrefix ) throw new CustomAxiosError(`Invalid path: ${path}, expected ${expectedPrefix}`, { status: BadRequest });
+    if (pathParts?.length && pathParts[0] === expectedPrefix ) { pathParts.shift() };
+  }
+  const pathFirst = pathParts?.length ? pathParts[0] : undefined;
+  return { pathParts, pathFirst };
 }

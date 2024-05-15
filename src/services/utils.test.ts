@@ -1,5 +1,6 @@
 import { HttpStatusCode } from 'axios';
-import { createResponse, groupSettledPromises, sleep } from './utils';
+import { CustomAxiosError } from '../types/error';
+import { createResponse, groupSettledPromises, parsePath, sleep } from './utils';
 
 describe('Test utils', () => {
   it('sleep()', async () => {
@@ -43,5 +44,15 @@ describe('Test utils', () => {
       errors,
       successes: ['5', '7', undefined],
     });
+  });
+  it('parsePath()', async () => {
+    expect(parsePath('')).toEqual({ pathParts: [] });
+    expect(parsePath('/v1')).toEqual({ pathParts: [] });
+    expect(parsePath('/v30')).toEqual({ pathParts: [] });
+    expect(parsePath('/auth')).toEqual({ pathParts: ['auth'], pathFirst: 'auth' });
+    expect(parsePath('/v1/auth/test', 'auth')).toEqual({ pathParts: ['test'], pathFirst: 'test' });
+    expect(() => {parsePath('/v1/xyz/test', 'auth')}).toThrow(CustomAxiosError);
+    expect(parsePath('/v2/customer/try/this', 'customer')).toEqual({ pathParts: ['try', 'this'], pathFirst: 'try' });
+    
   });
 });
