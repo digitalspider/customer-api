@@ -81,7 +81,7 @@ export async function handleList(tenantId: string): Promise<Customer[]> {
 }
 
 export async function handleGet(tenantId: string, objectId: string, userId: string): Promise<Customer> {
-  const result = await getCustomer(tenantId, userId);
+  const result = await getCustomer(tenantId, objectId);
   return result || {};
 }
 

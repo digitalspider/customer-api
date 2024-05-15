@@ -116,16 +116,19 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
 async function handleCreateJwt(input: LoginInput): Promise<string> {
   const { username, password: passwordInput, expiryInSec: expiryInSecInput } = input || {};
   const user = username ? (await getItemByUsername(username)) : undefined;
-  console.debug('got user', { user });
-  const { password, tenantId } = user || {};
+  const { password, ...safeUser } = user || {};
+  console.debug('got user', { user: safeUser });
+  const { tenantId, expiryInSec: expiryInSecFromUser } = user || {};
   if (!user || hash(passwordInput) !== password) {
     throw new CustomAxiosError('Username or password is invalid', { status: Unauthorized });
   }
   if (!tenantId) {
     throw new CustomAxiosError(`The user ${user.username} has not been configured`, { status: InternalServerError });
   }
-  const payload = mapAuthToToken(user);
-  const expiryInSec = expiryInSecInput && !isNaN(expiryInSecInput) ? Math.max(1, Math.min(24*3600, expiryInSecInput)) : undefined;
+  const expiryInSecIn = expiryInSecInput && !isNaN(expiryInSecInput) ? Math.max(1, Math.min(24*3600, expiryInSecInput)) : undefined;
+  const expiryInSec = expiryInSecIn || expiryInSecFromUser;
+  const payload = mapAuthToToken({ ...user, expiryInSec, context: { username } });
+  
   return createJwt(payload, undefined, expiryInSec);
 }
 

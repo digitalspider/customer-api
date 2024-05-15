@@ -7,10 +7,11 @@ import { getSecret } from './aws/secretService';
 import * as dynamo from './dynamo/auth';
 
 export function mapAuthToToken(authData: Auth): JwtPayload {
-  const { userId, tenantId, context } = authData;
+  const { userId, tenantId, expiryInSec, context } = authData;
   return {
     sub: userId,
     aud: tenantId,
+    exp: expiryInSec ? Math.floor(new Date().getTime()/1000) + expiryInSec : undefined,
     context,
   };
 }

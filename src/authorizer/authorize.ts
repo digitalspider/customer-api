@@ -48,7 +48,7 @@ export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Prom
     console.log(`Authorization approved. principalId=${principalId}, tenantId=${tenantId}`);
     return generatePolicy(principalId, 'Allow', methodArn, {
       ...context,
-      username: principalId,
+      userId: principalId,
       tenantId,
     });
   }
