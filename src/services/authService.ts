@@ -15,7 +15,7 @@ export function mapAuthToToken(authData: Auth): JwtPayload {
   };
 }
 
-export function extractToken(authorizationToken: string, expectedScheme = 'bearer') {
+export function extractToken(authorizationToken: string, expectedScheme = 'bearer'): string {
   if (!authorizationToken) return authorizationToken;
   const [scheme, token] = authorizationToken.split(' ');
   return scheme?.toLowerCase() === expectedScheme.toLowerCase() ? token : authorizationToken;

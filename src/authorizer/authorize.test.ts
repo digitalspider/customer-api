@@ -1,7 +1,11 @@
 import { APIGatewayRequestAuthorizerEvent } from "aws-lambda";
 import { handleEvent, updateResourceForCaching } from "./authorize";
+import { extractToken, verifyToken } from '../services/authService';
 
 jest.mock('../services/aws/secretService');
+// jest.mock('../services/authService');
+const extractTokenMock = jest.fn(extractToken);
+const verifyTokenMock = jest.fn(verifyToken);
 
 beforeAll(() => {
   console.log = jest.fn;
@@ -16,6 +20,9 @@ describe('authorize.ts', () => {
     expect(updateResourceForCaching(input)).toEqual('arn:aws:execute-api:ap-southeast-2:12345678:kej123asd/*/*');
   });
   it('handleEvent()', async () => {
+    const token = 'eyJhbGciOiJIUzI1NiIs...Zo24CtTtRzE_cWsxJ2P-UsWUKSjU';
+    extractTokenMock.mockReturnValue(token);
+    verifyTokenMock.mockResolvedValue({ sub: '123', aud: 'def' });
     const event: APIGatewayRequestAuthorizerEvent = {
       type: 'REQUEST',
       resource: 'x',
@@ -31,7 +38,7 @@ describe('authorize.ts', () => {
       headers: {
         accept: '*/*',
         'accept-encoding': 'gzip, deflate, br',
-        authorization: 'Bearer eyJhbGciOiJIUzI1NiIs...Zo24CtTtRzE_cWsxJ2P-UsWUKSjU',
+        authorization: `Bearer ${token}`,
         'content-length': '187',
         'content-type': 'application/json',
         host: 'api-staging.3keys.dev',
