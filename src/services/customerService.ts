@@ -4,7 +4,7 @@ import * as dynamo from './dynamo/customer';
 
 const DEFAULT_TENANT = 'public';
 
-export async function listCustomers(tenantId: string): Promise<Customer[]> {
+export async function listCustomers(tenantId = DEFAULT_TENANT): Promise<Customer[]> {
   const results = await dynamo.listItems(tenantId);
   return results;
 }

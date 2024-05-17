@@ -92,7 +92,7 @@ export async function handleList(tenantId: string): Promise<Customer[]> {
 }
 
 export async function handleGet(tenantId: string, objectId: string, userId: string): Promise<Customer> {
-  const result = await getCustomer(tenantId, objectId);
+  const result = await getCustomer(objectId, tenantId);
   return result || {};
 }
 
@@ -115,5 +115,5 @@ export async function handleUpdate(tenantId: string, customer: Partial<Customer>
 export async function handleDelete(tenantId: string, id: string, userId: string): Promise<void> {
   const item = await handleGet(tenantId, id, userId);
   if (!item) throw new CustomAxiosError(`Item not found: ${id}`, { status: NotFound, data: { id }});
-  await deleteCustomer(tenantId, item.id);
+  await deleteCustomer(item.id, tenantId);
 }
