@@ -1,15 +1,12 @@
 import { APIGatewayProxyEvent, APIGatewayProxyEventHeaders, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { HttpStatusCode } from 'axios';
-import { createHash } from 'node:crypto';
+import { JwtPayload } from 'jsonwebtoken';
 import { HTTP_METHOD } from '../common/constants';
-import { createItem, createJwt, extractToken, getItemByUsername, mapAuthToToken, verifyToken } from '../services/authService';
-import { createCustomer } from '../services/customerService';
+import { createItem, createJwt, extractToken, getItemByUsername, hash, mapAuthToToken, verifyToken } from '../services/authService';
+import { updateItem } from '../services/dynamo/auth';
 import { createResponse, parsePath } from '../services/utils';
 import { Auth, LoginInput } from '../types/auth';
-import { Customer } from '../types/customer';
 import { CustomAxiosError } from '../types/error';
-import { updateItem } from '../services/dynamo/auth';
-import { JwtPayload } from 'jsonwebtoken';
 
 const { Ok, BadRequest, InternalServerError, MethodNotAllowed, Unauthorized } = HttpStatusCode;
 const { GET, POST } = HTTP_METHOD;
@@ -41,24 +38,25 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
       case POST:
         switch(pathFirst) {
           case 'login': {
-            const token = await handleCreateJwt(body as LoginInput);
+            const { username, password, expiryInSec } = body as Auth;
+            const { password: ignore, ...safeBody } = body;
+            if (!username) throw new CustomAxiosError('Failed to login. Missing parameter: username', { status: BadRequest, data: { safeBody } });
+            if (!password) throw new CustomAxiosError('Failed to login. Missing parameter: password', { status: BadRequest, data: { safeBody } });
+            const token = await handleCreateJwt({ username, password, expiryInSec } as LoginInput);
             data = { token };
             break;
           }
           case 'signup': {
-            const { tenantId, username, expiryInSec: expiryInSecInput, email, mobile } = body as Auth;
-            const existingUser = username ? (await getItemByUsername(username)) : undefined;
-            if (existingUser) throw new CustomAxiosError('User already exists', { status: BadRequest, data: { username } });
+            const { username, password, expiryInSec: expiryInSecInput } = body as Auth;
+            const { password: ignore, ...safeBody } = body;
+            if (!username) throw new CustomAxiosError('Failed to signup. Missing parameter: username', { status: BadRequest, data: { safeBody } });
+            if (!password) throw new CustomAxiosError('Failed to signup. Missing parameter: password', { status: BadRequest, data: { safeBody } });
+            const existingUser = await getItemByUsername(username);
+            if (existingUser) throw new CustomAxiosError('Failed to signup. User already exists', { status: BadRequest, data: { username } });
             const expiryInSec = expiryInSecInput && !isNaN(expiryInSecInput) ? Math.max(1, Math.min(24*3600, expiryInSecInput)) : undefined;
-            const userData: Partial<Auth> = { tenantId, password: hash(body.password), username, expiryInSec, email, mobile };
+            const userData: Partial<Auth> = { username, password, expiryInSec, ...safeBody };
             const user = await createItem(userData);
             if (!user) throw new CustomAxiosError('Failed to create new user', { status: BadRequest, data: { username } });
-            if (!user.tenantId) throw new CustomAxiosError('Failed to set tenantId for user', { status: BadRequest, data: { username } });
-            const { userId } = user;
-            const { password, ...safeBody } = body; // remove password from body
-            const customer = await createCustomer({ ...safeBody, tenantId, createdBy: userId } as Customer);
-            if (!customer) throw new CustomAxiosError('Failed to create new customer', { status: BadRequest, data: { username } });
-            if (!customer.id) throw new CustomAxiosError('Failed to get customerId', { status: BadRequest, data: { username, customer } });
             const token = await handleCreateJwt({ username, password, expiryInSec } as LoginInput);
             data = { token };
             break;
@@ -76,11 +74,11 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
           }
           case 'reset-password': {
             const { newPass } = body;
-            if (!newPass) throw new CustomAxiosError('Failed to create new password. Missing parameter: newPass', { status: BadRequest });
+            if (!newPass) throw new CustomAxiosError('Failed to reset password. Missing parameter: newPass', { status: BadRequest });
             const { token } = queryStringParameters || {};
-            if (!token) throw new CustomAxiosError('Failed to create new password. Missing parameter: token', { status: BadRequest });
+            if (!token) throw new CustomAxiosError('Failed to reset password. Missing parameter: token', { status: BadRequest });
             const { username, userId } = (await verifyToken(token) || {}) as JwtPayload;
-            if (!username) throw new CustomAxiosError('Failed to create new password. Invalid token', { status: BadRequest });
+            if (!username) throw new CustomAxiosError('Failed to reset password. Invalid token', { status: BadRequest });
             await updateItem({ userId, username, password: hash(newPass) });
             console.debug(`Update new password for user ${username}`);
             const newJwt = await handleCreateJwt({ username, password: newPass } as LoginInput);
@@ -118,22 +116,15 @@ async function handleCreateJwt(input: LoginInput): Promise<string> {
   const user = username ? (await getItemByUsername(username)) : undefined;
   const { password, ...safeUser } = user || {};
   console.debug('got user', { user: safeUser });
-  const { tenantId, expiryInSec: expiryInSecFromUser } = user || {};
+  const { expiryInSec: expiryInSecFromUser } = user || {};
   if (!user || hash(passwordInput) !== password) {
     throw new CustomAxiosError('Username or password is invalid', { status: Unauthorized });
-  }
-  if (!tenantId) {
-    throw new CustomAxiosError(`The user ${user.username} has not been configured`, { status: InternalServerError });
   }
   const expiryInSecIn = expiryInSecInput && !isNaN(expiryInSecInput) ? Math.max(1, Math.min(24*3600, expiryInSecInput)) : undefined;
   const expiryInSec = expiryInSecIn || expiryInSecFromUser;
   const payload = mapAuthToToken({ ...user, expiryInSec });
   
   return createJwt(payload, undefined, expiryInSec);
-}
-
-function hash(input: string) {
-  return createHash('sha3-256').update(input, 'utf8').digest('hex');
 }
 
 function extractTokenFromHeaders(headers: APIGatewayProxyEventHeaders, expectedScheme?: string) {

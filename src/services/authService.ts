@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import jwt, { JwtPayload, SignOptions, VerifyOptions } from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { SECRET_MANAGER_NAME, URL_AUTH } from '../common/config';
@@ -78,14 +79,15 @@ export async function getItemByUsername(username: string): Promise<Auth|undefine
 }
 
 export async function createItem(auth: Partial<Auth>): Promise<Auth> {
-  const { userId = uuidv4(), password = uuidv4(), tenantId = 'default', expiryInSec, ...userData } = auth;
-  const item = { userId, password, tenantId, expiryInSec, ...userData };
+  const { userId = uuidv4(), password = uuidv4(), ...userData } = auth;
+  const item = { userId, password: hash(password), ...cleanInput(userData) };
   console.debug('creating item: '+JSON.stringify(item));
   return dynamo.createItem(item);
 }
 
-export async function updateItem(userId: string, auth: Auth): Promise<Auth> {
-  const item = { userId, ...cleanInput(auth) };
+export async function updateItem(userId: string, auth: Partial<Auth>): Promise<Auth> {
+  const { password } = auth;
+  const item = { userId, password: password && hash(password), ...cleanInput(auth) };
   return dynamo.updateItem(item);
 }
 
@@ -94,7 +96,11 @@ export async function deleteItem(userId: string): Promise<void> {
   return dynamo.deleteItem(item);
 }
 
-function cleanInput(input: Auth): Omit<Auth, 'username'> {
-  const { expiryInSec, tenantId } = input;
-  return { expiryInSec, tenantId };
+function cleanInput(input: Partial<Auth>): Partial<Auth> {
+  const { userId, password, ...safeInput } = input;
+  return safeInput;
+}
+
+export function hash(input: string) {
+  return createHash('sha3-256').update(input, 'utf8').digest('hex');
 }
