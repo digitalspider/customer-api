@@ -30,7 +30,7 @@ export async function listItems(pk: string): Promise<Item[]> {
   const response = await query({
     TableName: TABLE_NAME,
     KeyConditionExpression: 'tenantId = :tenantId',
-    ExpressionAttributeValues: { ':tenantId': { pk } },
+    ExpressionAttributeValues: { ':tenantId': pk },
   });
   const items = response.Items || [];
   return items.map((item) => (item)) as Item[];
