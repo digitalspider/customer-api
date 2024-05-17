@@ -1,4 +1,3 @@
-import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { AWSENV } from '../../common/config';
 import { Auth } from '../../types/auth';
 import { create, deleteItem as _delete, get, scan, update, query } from '../aws/dynamoService';
@@ -32,7 +31,8 @@ export async function listItems(): Promise<Item[]> {
     TableName: TABLE_NAME,
   });
   const items = response.Items || [];
-  return items.map((item) => unmarshall(item)) as Item[];
+  // return items.map((item) => unmarshall(item)) as Item[];
+  return items.map((item) => item) as Item[];
 }
 
 export async function updateItem(item: Item): Promise<Item> {
@@ -118,7 +118,8 @@ export async function searchItems(filter: { [key: string]: string }): Promise<It
   });
 
   const items = response.Items || [];
-  return items.map((item) => unmarshall(item)) as Item[];
+  // return items.map((item) => unmarshall(item)) as Item[];
+  return items.map((item) => item) as Item[];
 }
 
 export async function queryIndex(IndexName: string, KeyConditionExpression: string, ExpressionAttributeValues: Record<string, any>): Promise<Item[]> {
