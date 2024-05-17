@@ -17,7 +17,9 @@ function getDynamoKey(keys: Item) {
 }
 
 export async function createItem(item: Item): Promise<Item> {
-  await create(TABLE_NAME, getDynamoKey(item), item);
+  const createdAt = new Date().toISOString();
+  const itemData = { ...item, createdAt };
+  await create(TABLE_NAME, getDynamoKey(item), itemData);
   return getItem(item);
 }
 
@@ -37,7 +39,7 @@ export async function listItems(pk: string): Promise<Item[]> {
 }
 
 export async function updateItem(item: Item): Promise<Item> {
-  const { firstName, lastName, email, mobileNumber, deviceId, deviceOs, encrypted, customerType } = item;
+  const { firstName, lastName, email, mobileNumber, deviceId, deviceOs, encrypted, customerType, updatedBy, deletedBy } = item;
   const updates: KeyValue[] = [];
   if (encrypted !== undefined && encrypted !== null) {
     updates.push({ name: 'encrypted', value: encrypted });
@@ -63,6 +65,14 @@ export async function updateItem(item: Item): Promise<Item> {
   if (deviceOs !== undefined && deviceOs !== null) {
     updates.push({ name: 'deviceOs', value: deviceOs });
   }
+  if (updatedBy !== undefined && updatedBy !== null) {
+    updates.push({ name: 'updatedBy', value: updatedBy });
+  }
+  if (deletedBy !== undefined && deletedBy !== null) {
+    updates.push({ name: 'updatedBy', value: deletedBy });
+  }
+  const updatedAt = new Date().toISOString();
+  updates.push({ name: 'updatedAt', value: updatedAt });
 
   const { UpdateExpression, ExpressionAttributeValues } = getDynamoUpdateExpressions(updates);
   const input = {

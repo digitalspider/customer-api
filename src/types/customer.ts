@@ -1,6 +1,18 @@
-export type Customer = {
+export type ItemKey = {
   tenantId: string;
   id: string;
+};
+
+export type AuditData = {
+  createdBy?: string;
+  createdAt?: string;
+  updatedBy?: string;
+  updatedAt?: string;
+  deletedBy?: string;
+  deletedAt?: string;
+};
+
+export type Customer = ItemKey & AuditData & {
   customerType?: string;
   firstName?: string;
   lastName?: string;
@@ -10,7 +22,6 @@ export type Customer = {
   deviceOs?: string;
   encrypted?: string;
   status?: Status;
-  createdBy?: string;
 };
 
 export type Status = 'pending' | 'approved' | 'declined';
