@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda
 import { HttpStatusCode } from 'axios';
 import { AWSENV } from '../common/config';
 import { HTTP_METHOD } from '../common/constants';
-import { createData, deleteData, getData, listData, updateData } from '../services/dataService';
+import { ListResults, createData, deleteData, getData, listData, updateData } from '../services/dataService';
 import { Item } from '../services/dynamo/data';
 import { createResponse, parsePath } from '../services/utils';
 import { User } from '../types/auth';
@@ -93,15 +93,14 @@ function getTableName(tableName: string, tenantId?: string): string {
   return tenantId && tableName ? `${tenantId}-${tableName}-${AWSENV}` : tableName ? `${tableName}-${AWSENV}` : '';
 }
 
-export async function handleList(tableName: string, user: User): Promise<Item[]> {
+export async function handleList(tableName: string, user: User): Promise<ListResults> {
   const result = await listData(tableName, user);
-  return result || [];
+  return result || {};
 }
 
 export async function handleGet(tableName: string, objectId: string, user: User): Promise<Item> {
   const result = await getData(tableName, objectId, user);
-  if (!result) throw new CustomAxiosError(`Item not found`, { status: NotFound, data: { tableName, objectId, user }});
-  return result;
+  return result || {};
 }
 
 export async function handleCreate(tableName: string, customer: Item, user: User): Promise<Item> {

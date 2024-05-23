@@ -5,28 +5,43 @@ import { CustomAxiosError } from '../types/error';
 import * as dynamo from './dynamo/data';
 
 const { NotFound, Forbidden } = HttpStatusCode;
-type Item = dynamo.Item;
 
-export async function listData(tableName: string, user: User): Promise<Item[]> {
+type Item = dynamo.Item;
+type ListResultItem = {
+  total: number;
+  data: Item[];
+}
+export type ListResults = {
+  total: number;
+  self?: ListResultItem;
+  [x: string]: any;
+}
+
+export async function listData(tableName: string, user: User): Promise<ListResults> {
   const { userId, claims = [] } = user;
   const indexName = 'createdBy-index'
   const KeyConditionExpression = 'createdBy = :createdBy';
   const ExpressionAttributeValues = { ':createdBy': userId };
   const userResults = await dynamo.queryIndex(tableName, indexName, KeyConditionExpression, ExpressionAttributeValues);
-  const results: any = { self: userResults };
+  const total = (userResults || []).length || 0;
+  const results: ListResults = { total, self: { total, data: userResults }};
+  let groupsTotal = 0;
   const promises = claims.filter(claim => claim.endsWith(':read')).map(async (claim) => {
     const groupId = claim.replace(':read', '');
     const indexName = 'groupId-index'
     const KeyConditionExpression = 'groupId = :groupId';
     const ExpressionAttributeValues = { ':groupId': groupId };
-    const groupResults = await dynamo.queryIndex(tableName, indexName, KeyConditionExpression, ExpressionAttributeValues);
-    results[groupId] = groupResults;
+    const groupResults = (await dynamo.queryIndex(tableName, indexName, KeyConditionExpression, ExpressionAttributeValues)) || [];
+    const { length: groupTotal = 0 } = groupResults;
+    results[groupId] = { total: groupTotal, data: groupResults };
+    groupsTotal += groupTotal;
   });
   await Promise.all(promises);
+  results.total += groupsTotal;
   return results;
 }
 
-export async function getData(tableName: string, id: string, user: User, requiredClaim = 'read'): Promise<Item|undefined> {
+export async function getData(tableName: string, id: string, user: User, requiredClaim = 'read'): Promise<Item> {
   const { userId, claims = [] } = user;
   const item = { id };
   const result = await dynamo.getItem(tableName, item);
@@ -36,7 +51,7 @@ export async function getData(tableName: string, id: string, user: User, require
   const { createdBy, groupId } = result;
   if (createdBy === userId) return result;
   if (!groupId || !claims.includes(`${groupId}:${requiredClaim}`)) {
-    throw new CustomAxiosError(`Forbidden`, { status: Forbidden, data: { tableName, id, user }});
+    throw new CustomAxiosError(`Forbidden`, { status: Forbidden, data: { tableName, id, user, groupId, createdBy }});
   }
   return result;
 }
