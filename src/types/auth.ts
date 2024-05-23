@@ -8,11 +8,15 @@ export type LoginInput = {
   expiryInSec?: number;
 };
 
-export type Auth = {
+export type User = {
   userId: string;
-  password?: string;
   username?: string;
   tenantId?: string;
+  claims?: string;
+};
+
+export type Auth = User & {
+  password?: string;
   expiryInSec?: number;
   email?: string;
   mobile?: string;

@@ -1,8 +1,10 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { HttpStatusCode } from 'axios';
+import { AWSENV } from '../common/config';
 import { HTTP_METHOD } from '../common/constants';
 import { createData, deleteData, getData, listData, updateData } from '../services/dataService';
 import { createResponse, parsePath } from '../services/utils';
+import { User } from '../types/auth';
 import { Customer } from '../types/customer';
 import { CustomAxiosError } from '../types/error';
 
@@ -13,21 +15,22 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
   const { httpMethod, path, body: bodyString, requestContext, pathParameters } = event;
   const { awsRequestId } = context;
   const { authorizer } = requestContext || {};
-  const { tenantId, username, userId } = authorizer || {};
+  const { tenantId, username, userId, claims } = authorizer || {};
+  const user: User = { tenantId, username, userId, claims };
   const { uuid: objectId } = pathParameters || {};
   const body = bodyString ? JSON.parse(bodyString) : undefined;
-  const { pathParts, pathFirst: tableName = '' } = parsePath(path);
+  const { pathParts, pathFirst = '' } = parsePath(path);
+  const tableName = getTableName(pathFirst, tenantId);
   console.debug('request', {
     handler: 'appHandler',
     httpMethod,
     path,
     awsRequestId,
-    tenantId,
+    user,
     objectId,
-    username,
-    userId,
     tableName,
     pathParts,
+    pathFirst,
     body,
   });
 
@@ -36,24 +39,24 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
     switch (httpMethod) {
       case GET:
         if (path.endsWith(`/${tableName}`)) {
-          result = await handleList(tableName, tenantId);
+          result = await handleList(tableName, user);
         } else {
           if (!objectId) throw new CustomAxiosError(`Failed to get item: ${tableName}. Missing parameter: id`, { status: BadRequest });
-          result = await handleGet(tableName, tenantId, objectId, userId);
+          result = await handleGet(tableName, objectId, user);
         }
         break;
       case POST:
         if (path.endsWith(`/${tableName}`)) {
-          result = await handleCreate(tableName, tenantId, body as Customer, userId);
+          result = await handleCreate(tableName, body as Customer, user);
         }
         break;
       case PUT:
         if (!objectId) throw new CustomAxiosError(`Failed to update item: ${tableName}. Missing parameter: id`, { status: BadRequest });
-        result = await handleUpdate(tableName, tenantId, { ...body, id: objectId } as Partial<Customer>, userId);
+        result = await handleUpdate(tableName, { ...body, id: objectId } as Partial<Customer>, user);
         break;
       case DELETE:
         if (!objectId) throw new CustomAxiosError(`Failed to delete item: ${tableName}. Missing parameter: id`, { status: BadRequest });
-        result = await handleDelete(tableName, tenantId, objectId, userId);
+        result = await handleDelete(tableName, objectId, user);
         break;
       default:
         throw new CustomAxiosError('Invalid request', { status: MethodNotAllowed });
@@ -86,34 +89,31 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
   }
 }
 
-export async function handleList(tableName: string, tenantId: string): Promise<Customer[]> {
-  const result = await listData(tableName, tenantId);
+function getTableName(tableName: string, tenantId?: string): string {
+  return tenantId && tableName ? `${tenantId}-${tableName}-${AWSENV}` : tableName ? `${tableName}-${AWSENV}` : '';
+}
+
+export async function handleList(tableName: string, user: User): Promise<Customer[]> {
+  const result = await listData(tableName, user);
   return result || [];
 }
 
-export async function handleGet(tableName: string, tenantId: string, objectId: string, userId: string): Promise<Customer> {
-  const result = await getData(tableName, objectId, tenantId);
+export async function handleGet(tableName: string, objectId: string, user: User): Promise<Customer> {
+  const result = await getData(tableName, objectId, user);
+  if (!result) throw new CustomAxiosError(`Item not found`, { status: NotFound, data: { tableName, objectId, user }});
+  return result;
+}
+
+export async function handleCreate(tableName: string, customer: Customer, user: User): Promise<Customer> {
+  const result = await createData(tableName, customer, user);
   return result || {};
 }
 
-export async function handleCreate(tableName: string, tenantId: string, customer: Customer, userId: string): Promise<Customer> {
-  const customerData = { ...customer, tenantId, createdBy: userId } as Customer;
-  const result = await createData(tableName, customerData);
+export async function handleUpdate(tableName: string, customer: Partial<Customer>, user: User): Promise<Customer> {
+  const result = await updateData(tableName, customer, user);
   return result || {};
 }
 
-export async function handleUpdate(tableName: string, tenantId: string, customer: Partial<Customer>, userId: string): Promise<Customer> {
-  const { id } = customer;
-  if (!id) throw new CustomAxiosError(`Item missing id`, { status: NotFound });
-  const item = await handleGet(tableName, tenantId, id, userId);
-  if (!item) throw new CustomAxiosError(`Item not found: ${id}`, { status: NotFound, data: { id }});
-  const customerData = { ...customer, tenantId, updatedBy: userId } as Customer;
-  const result = await updateData(tableName, customerData);
-  return result || {};
-}
-
-export async function handleDelete(tableName: string, tenantId: string, id: string, userId: string): Promise<void> {
-  const item = await handleGet(tableName, tenantId, id, userId);
-  if (!item) throw new CustomAxiosError(`Item not found: ${id}`, { status: NotFound, data: { id }});
-  await deleteData(tableName, item.id, tenantId);
+export async function handleDelete(tableName: string, id: string, user: User): Promise<void> {
+  await deleteData(tableName, id, user);
 }

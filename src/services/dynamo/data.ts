@@ -1,9 +1,9 @@
-import { AWSENV } from '../../common/config';
 import { create, deleteItem as _delete, get, scan, update, query } from '../aws/dynamoService';
 
 export type DataKey = {
-    tenantId: string;
-    id: string;
+  createdBy: string;
+  id: string;
+  groupId?: string;
 };
 export type Item = DataKey & {
   [x: string]: any; // eslint-disable-line
@@ -22,32 +22,28 @@ type KeyValue = {
   value: string | boolean;
 };
 
-function getTableName(tableName: string): string {
-  return `${tableName}-${AWSENV}`;
-}
-
 function getDynamoKey(keys: Item): DataKey {
-  const { tenantId, id } = keys;
-  return { tenantId, id };
+  const { createdBy, id } = keys;
+  return { createdBy, id };
 }
 
 export async function createItem(tableName: string, item: Item): Promise<Item> {
   const createdAt = new Date().toISOString();
   const itemData = { ...item, createdAt };
-  await create(getTableName(tableName), getDynamoKey(item), itemData);
+  await create(tableName, getDynamoKey(item), itemData);
   return getItem(tableName, item);
 }
 
 export async function getItem(tableName: string, item: Item): Promise<Item> {
-  const response = await get(getTableName(tableName), getDynamoKey(item));
+  const response = await get(tableName, getDynamoKey(item));
   return response.Item as Item;
 }
 
-export async function listItems(tableName: string, pk: string): Promise<Item[]> {
+export async function listItems(tableName: string, userId: string): Promise<Item[]> {
   const response = await query({
-    TableName: getTableName(tableName),
-    KeyConditionExpression: 'tenantId = :tenantId',
-    ExpressionAttributeValues: { ':tenantId': pk },
+    TableName: tableName,
+    KeyConditionExpression: 'ownerId = :ownerId',
+    ExpressionAttributeValues: { ':ownerId': userId },
   });
   const items = response.Items || [];
   return items.map((item) => (item)) as Item[];
@@ -57,7 +53,7 @@ export async function updateItem(tableName: string, item: Item): Promise<Item> {
   const keys = Object.getOwnPropertyNames(item);
   const updates: KeyValue[] = [];
   keys.map(key => {
-    if (!['id', 'tenantId'].includes(key)) {
+    if (!['id','createdAt','createdBy'].includes(key)) {
       const value = (item as any)[key];
       if (value !== undefined && value !== null) {
         updates.push({ name: key, value });
@@ -69,7 +65,7 @@ export async function updateItem(tableName: string, item: Item): Promise<Item> {
 
   const { UpdateExpression, ExpressionAttributeValues } = getDynamoUpdateExpressions(updates);
   const input = {
-    TableName: getTableName(tableName),
+    TableName: tableName,
     Key: getDynamoKey(item),
     UpdateExpression,
     ExpressionAttributeValues,
@@ -79,7 +75,7 @@ export async function updateItem(tableName: string, item: Item): Promise<Item> {
 }
 
 export async function deleteItem(tableName: string, item: Item): Promise<void> {
-  await _delete(getTableName(tableName), getDynamoKey(item));
+  await _delete(tableName, getDynamoKey(item));
 }
 
 function getDynamoUpdateExpressions(input: KeyValue[]) {
@@ -93,7 +89,7 @@ function getDynamoUpdateExpressions(input: KeyValue[]) {
 
 export async function count(tableName: string): Promise<number> {
   const response = await scan({
-    TableName: getTableName(tableName),
+    TableName: tableName,
     Select: 'COUNT',
   });
   const count = response.Items?.length || 0;
@@ -132,10 +128,23 @@ function getFilterExpression(inputs: { [key: string]: string }) {
 
 export async function searchItems(tableName: string, filter: { [key: string]: string }): Promise<Item[]> {
   const response = await scan({
-    TableName: getTableName(tableName),
+    TableName: tableName,
     ...getFilterExpression(filter),
   });
 
   const items = response.Items || [];
   return items.map((item) => (item)) as Item[];
+}
+
+export async function queryIndex(tableName: string, indexName: string, KeyConditionExpression: string, ExpressionAttributeValues: Record<string, any>): Promise<Item[]> {
+  const response = await query({
+    TableName: tableName,
+    IndexName: indexName,
+    KeyConditionExpression,
+    ExpressionAttributeValues,
+  });
+
+  const items = response.Items || [];
+  // return items.map((item) => unmarshall(item)) as Item[];
+  return items.map((item) => item) as Item[];
 }

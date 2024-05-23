@@ -36,17 +36,20 @@ export async function listItems(): Promise<Item[]> {
 }
 
 export async function updateItem(item: Item): Promise<Item> {
-  const { tenantId, expiryInSec } = item;
+  const { tenantId, expiryInSec, claims, mobile, email } = item;
+  const validItem = { tenantId, expiryInSec, claims, mobile, email };
+  const keys = Object.getOwnPropertyNames(validItem);
   const updates: KeyValue[] = [];
-  if (tenantId !== undefined && tenantId !== null) {
-    updates.push({ name: 'tenantId', value: tenantId });
-  }
-  if (expiryInSec !== undefined && expiryInSec !== null) {
-    updates.push({ name: 'expiryInSec', value: expiryInSec });
-  }
-  if (expiryInSec !== undefined && expiryInSec !== null) {
-    updates.push({ name: 'username', value: expiryInSec });
-  }
+  keys.map(key => {
+    if (!['id','createdAt','createdBy'].includes(key)) {
+      const value = (item as any)[key];
+      if (value !== undefined && value !== null) {
+        updates.push({ name: key, value });
+      }
+    }
+  });
+  const updatedAt = new Date().toISOString();
+  updates.push({ name: 'updatedAt', value: updatedAt });
 
   const { UpdateExpression, ExpressionAttributeValues } = getDynamoUpdateExpressions(updates);
   const input = {

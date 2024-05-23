@@ -440,18 +440,33 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName:
-        Fn::Sub: customer-${AWSENV}
+        Fn::Sub: customer2-${AWSENV}
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
-        - AttributeName: tenantId
+        - AttributeName: createdBy
           AttributeType: S
         - AttributeName: id
           AttributeType: S
+        - AttributeName: groupId
+          AttributeType: S
       KeySchema:
-        - AttributeName: tenantId
+        - AttributeName: createdBy
           KeyType: HASH
         - AttributeName: id
           KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: id-index
+          KeySchema:
+            - AttributeName: id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: groupId-index
+          KeySchema:
+            - AttributeName: groupId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
   #END: DynamoDB tables
 
   #BEGIN: Lambda Functions
