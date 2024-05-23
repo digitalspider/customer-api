@@ -1,18 +1,6 @@
-export type ItemKey = {
-  tenantId: string;
-  id: string;
-};
+import { AuditData, Item } from "../services/dynamo/data";
 
-export type AuditData = {
-  createdBy?: string;
-  createdAt?: string;
-  updatedBy?: string;
-  updatedAt?: string;
-  deletedBy?: string;
-  deletedAt?: string;
-};
-
-export type Customer = ItemKey & AuditData & {
+export type Customer = Item & AuditData & {
   customerType?: string;
   firstName?: string;
   lastName?: string;
