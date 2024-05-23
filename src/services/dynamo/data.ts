@@ -57,9 +57,11 @@ export async function updateItem(tableName: string, item: Item): Promise<Item> {
   const keys = Object.getOwnPropertyNames(item);
   const updates: KeyValue[] = [];
   keys.map(key => {
-    const value = (item as any)[key];
-    if (value !== undefined && value !== null) {
-      updates.push({ name: key, value });
+    if (!['id', 'tenantId'].includes(key)) {
+      const value = (item as any)[key];
+      if (value !== undefined && value !== null) {
+        updates.push({ name: key, value });
+      }
     }
   });
   const updatedAt = new Date().toISOString();

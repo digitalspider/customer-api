@@ -2,7 +2,7 @@ import { AWSENV } from '../../common/config';
 import { Customer } from '../../types/customer';
 import { create, deleteItem as _delete, get, scan, update, query } from '../aws/dynamoService';
 
-const TABLE_NAME = `customers-${AWSENV}`;
+const TABLE_NAME = `customer-${AWSENV}`;
 
 type Item = Customer;
 
