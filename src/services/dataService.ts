@@ -8,13 +8,13 @@ const { NotFound, Forbidden } = HttpStatusCode;
 type Item = dynamo.Item;
 
 export async function listData(tableName: string, user: User): Promise<Item[]> {
-  const { userId, claims = '' } = user;
+  const { userId, claims = [] } = user;
   const indexName = 'createdBy-index'
   const KeyConditionExpression = 'createdBy = :createdBy';
   const ExpressionAttributeValues = { ':createdBy': userId };
   const userResults = await dynamo.queryIndex(tableName, indexName, KeyConditionExpression, ExpressionAttributeValues);
   const results: any = { self: userResults };
-  const promises = claims.split(',').filter(claim => claim.endsWith(':read')).map(async (claim) => {
+  const promises = claims.filter(claim => claim.endsWith(':read')).map(async (claim) => {
     const groupId = claim.replace(':read', '');
     const indexName = 'groupId-index'
     const KeyConditionExpression = 'groupId = :groupId';
@@ -27,7 +27,7 @@ export async function listData(tableName: string, user: User): Promise<Item[]> {
 }
 
 export async function getData(tableName: string, id: string, user: User, requiredClaim = 'read'): Promise<Item|undefined> {
-  const { userId, claims } = user;
+  const { userId, claims = [] } = user;
   const item = { id };
   const result = await dynamo.getItem(tableName, item);
   if (!result) {
@@ -35,7 +35,7 @@ export async function getData(tableName: string, id: string, user: User, require
   }
   const { createdBy, groupId } = result;
   if (createdBy === userId) return result;
-  if (!groupId || !claims?.split(',').includes(`${groupId}:${requiredClaim}`)) {
+  if (!groupId || !claims.includes(`${groupId}:${requiredClaim}`)) {
     throw new CustomAxiosError(`Forbidden`, { status: Forbidden, data: { tableName, id, user }});
   }
   return result;

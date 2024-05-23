@@ -15,8 +15,8 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
   const { httpMethod, path, body: bodyString, requestContext, pathParameters } = event;
   const { awsRequestId } = context;
   const { authorizer } = requestContext || {};
-  const { tenantId, username, userId, claims } = authorizer || {};
-  const user: User = { tenantId, username, userId, claims };
+  const { tenantId, username, userId, claims: claimsInput = '' } = authorizer || {};
+  const user: User = { tenantId, username, userId, claims: claimsInput.trim().split(',') };
   const { uuid: objectId } = pathParameters || {};
   const body = bodyString ? JSON.parse(bodyString) : undefined;
   const { pathParts, pathFirst = '' } = parsePath(path);

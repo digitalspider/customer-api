@@ -12,7 +12,7 @@ export type User = {
   userId: string;
   username?: string;
   tenantId?: string;
-  claims?: string;
+  claims?: string[];
 };
 
 export type Auth = User & {
