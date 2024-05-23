@@ -1,11 +1,10 @@
 import { create, deleteItem as _delete, get, scan, update, query } from '../aws/dynamoService';
 
 export type DataKey = {
-  createdBy: string;
   id: string;
-  groupId?: string;
 };
 export type Item = DataKey & {
+  groupId?: string;
   [x: string]: any; // eslint-disable-line
 };
 export type AuditData = {
@@ -23,8 +22,8 @@ type KeyValue = {
 };
 
 function getDynamoKey(keys: Item): DataKey {
-  const { createdBy, id } = keys;
-  return { createdBy, id };
+  const { id } = keys;
+  return { id };
 }
 
 export async function createItem(tableName: string, item: Item): Promise<Item> {
@@ -39,11 +38,9 @@ export async function getItem(tableName: string, item: Item): Promise<Item> {
   return response.Item as Item;
 }
 
-export async function listItems(tableName: string, userId: string): Promise<Item[]> {
-  const response = await query({
+export async function listItems(tableName: string): Promise<Item[]> {
+  const response = await scan({
     TableName: tableName,
-    KeyConditionExpression: 'ownerId = :ownerId',
-    ExpressionAttributeValues: { ':ownerId': userId },
   });
   const items = response.Items || [];
   return items.map((item) => (item)) as Item[];

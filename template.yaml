@@ -440,24 +440,22 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName:
-        Fn::Sub: customer-${AWSENV}
+        Fn::Sub: customer2-${AWSENV}
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
-        - AttributeName: createdBy
-          AttributeType: S
         - AttributeName: id
+          AttributeType: S
+        - AttributeName: createdBy
           AttributeType: S
         - AttributeName: groupId
           AttributeType: S
       KeySchema:
-        - AttributeName: createdBy
-          KeyType: HASH
         - AttributeName: id
-          KeyType: RANGE
+          KeyType: HASH
       GlobalSecondaryIndexes:
-        - IndexName: id-index
+        - IndexName: createdBy-index
           KeySchema:
-            - AttributeName: id
+            - AttributeName: createdBy
               KeyType: HASH
           Projection:
             ProjectionType: ALL

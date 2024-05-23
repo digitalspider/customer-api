@@ -9,8 +9,11 @@ type Item = dynamo.Item;
 
 export async function listData(tableName: string, user: User): Promise<Item[]> {
   const { userId, claims = '' } = user;
-  const userResults = await dynamo.listItems(tableName, userId);
-  const results: any = { my: userResults };
+  const indexName = 'createdBy-index'
+  const KeyConditionExpression = 'createdBy = :createdBy';
+  const ExpressionAttributeValues = { ':createdBy': userId };
+  const userResults = await dynamo.queryIndex(tableName, indexName, KeyConditionExpression, ExpressionAttributeValues);
+  const results: any = { self: userResults };
   const promises = claims.split(',').filter(claim => claim.endsWith(':read')).map(async (claim) => {
     const groupId = claim.replace(':read', '');
     const indexName = 'groupId-index'
@@ -25,22 +28,15 @@ export async function listData(tableName: string, user: User): Promise<Item[]> {
 
 export async function getData(tableName: string, id: string, user: User, requiredClaim = 'read'): Promise<Item|undefined> {
   const { userId, claims } = user;
-  const item = { id, createdBy: userId };
+  const item = { id };
   const result = await dynamo.getItem(tableName, item);
   if (!result) {
-    const indexName = 'id-index'
-    const KeyConditionExpression = 'id = :id';
-    const ExpressionAttributeValues = { ':id': id };
-    const results = await dynamo.queryIndex(tableName, indexName, KeyConditionExpression, ExpressionAttributeValues);
-    if (!results?.length) {
-      throw new CustomAxiosError(`Item not found`, { status: NotFound, data: { tableName, id, user }});
-    }
-    const found = results[0];
-    const { groupId } = found;
-    if (!groupId || !claims?.split(',').includes(`${groupId}:${requiredClaim}`)) {
-      throw new CustomAxiosError(`Forbidden`, { status: Forbidden, data: { tableName, id, user }});
-    }
-    return found;
+    throw new CustomAxiosError(`Item not found`, { status: NotFound, data: { tableName, id, user }});
+  }
+  const { createdBy, groupId } = result;
+  if (createdBy === userId) return result;
+  if (!groupId || !claims?.split(',').includes(`${groupId}:${requiredClaim}`)) {
+    throw new CustomAxiosError(`Forbidden`, { status: Forbidden, data: { tableName, id, user }});
   }
   return result;
 }
@@ -56,7 +52,7 @@ export async function updateData(tableName: string, itemData: Partial<Item>, use
   const { id } = itemData;
   if (!id) throw new Error(`Cannot update ${tableName} without required properties: id`);
   await getData(tableName, id, user, 'write');
-  const item = { id, createdBy: user.userId, ...cleanInput(itemData) };
+  const item = { id, updatedBy: user.userId, ...cleanInput(itemData) };
   return dynamo.updateItem(tableName, item);
 }
 
