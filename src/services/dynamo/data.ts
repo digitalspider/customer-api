@@ -3,10 +3,6 @@ import { create, deleteItem as _delete, get, scan, update, query } from '../aws/
 export type DataKey = {
   id: string;
 };
-export type Item = DataKey & {
-  groupId?: string;
-  [x: string]: any; // eslint-disable-line
-};
 export type AuditData = {
   createdBy?: string;
   createdAt?: string;
@@ -14,6 +10,10 @@ export type AuditData = {
   updatedAt?: string;
   deletedBy?: string;
   deletedAt?: string;
+};
+export type Item = AuditData & DataKey & {
+  groupId?: string;
+  [x: string]: any; // eslint-disable-line
 };
 
 type KeyValue = {

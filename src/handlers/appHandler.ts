@@ -3,9 +3,9 @@ import { HttpStatusCode } from 'axios';
 import { AWSENV } from '../common/config';
 import { HTTP_METHOD } from '../common/constants';
 import { createData, deleteData, getData, listData, updateData } from '../services/dataService';
+import { Item } from '../services/dynamo/data';
 import { createResponse, parsePath } from '../services/utils';
 import { User } from '../types/auth';
-import { Customer } from '../types/customer';
 import { CustomAxiosError } from '../types/error';
 
 const { Ok, MethodNotAllowed, InternalServerError, BadRequest, NotFound } = HttpStatusCode;
@@ -47,12 +47,12 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
         break;
       case POST:
         if (path.endsWith(`/${pathFirst}`)) {
-          result = await handleCreate(tableName, body as Customer, user);
+          result = await handleCreate(tableName, body as Item, user);
         }
         break;
       case PUT:
         if (!objectId) throw new CustomAxiosError(`Failed to update item: ${pathFirst}. Missing parameter: id`, { status: BadRequest });
-        result = await handleUpdate(tableName, { ...body, id: objectId } as Partial<Customer>, user);
+        result = await handleUpdate(tableName, { ...body, id: objectId } as Partial<Item>, user);
         break;
       case DELETE:
         if (!objectId) throw new CustomAxiosError(`Failed to delete item: ${pathFirst}. Missing parameter: id`, { status: BadRequest });
@@ -93,23 +93,23 @@ function getTableName(tableName: string, tenantId?: string): string {
   return tenantId && tableName ? `${tenantId}-${tableName}-${AWSENV}` : tableName ? `${tableName}-${AWSENV}` : '';
 }
 
-export async function handleList(tableName: string, user: User): Promise<Customer[]> {
+export async function handleList(tableName: string, user: User): Promise<Item[]> {
   const result = await listData(tableName, user);
   return result || [];
 }
 
-export async function handleGet(tableName: string, objectId: string, user: User): Promise<Customer> {
+export async function handleGet(tableName: string, objectId: string, user: User): Promise<Item> {
   const result = await getData(tableName, objectId, user);
   if (!result) throw new CustomAxiosError(`Item not found`, { status: NotFound, data: { tableName, objectId, user }});
   return result;
 }
 
-export async function handleCreate(tableName: string, customer: Customer, user: User): Promise<Customer> {
+export async function handleCreate(tableName: string, customer: Item, user: User): Promise<Item> {
   const result = await createData(tableName, customer, user);
   return result || {};
 }
 
-export async function handleUpdate(tableName: string, customer: Partial<Customer>, user: User): Promise<Customer> {
+export async function handleUpdate(tableName: string, customer: Partial<Item>, user: User): Promise<Item> {
   const result = await updateData(tableName, customer, user);
   return result || {};
 }
