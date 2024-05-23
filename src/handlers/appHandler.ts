@@ -38,24 +38,24 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
     let result;
     switch (httpMethod) {
       case GET:
-        if (path.endsWith(`/${tableName}`)) {
+        if (path.endsWith(`/${pathFirst}`)) {
           result = await handleList(tableName, user);
         } else {
-          if (!objectId) throw new CustomAxiosError(`Failed to get item: ${tableName}. Missing parameter: id`, { status: BadRequest });
+          if (!objectId) throw new CustomAxiosError(`Failed to get item: ${pathFirst}. Missing parameter: id`, { status: BadRequest });
           result = await handleGet(tableName, objectId, user);
         }
         break;
       case POST:
-        if (path.endsWith(`/${tableName}`)) {
+        if (path.endsWith(`/${pathFirst}`)) {
           result = await handleCreate(tableName, body as Customer, user);
         }
         break;
       case PUT:
-        if (!objectId) throw new CustomAxiosError(`Failed to update item: ${tableName}. Missing parameter: id`, { status: BadRequest });
+        if (!objectId) throw new CustomAxiosError(`Failed to update item: ${pathFirst}. Missing parameter: id`, { status: BadRequest });
         result = await handleUpdate(tableName, { ...body, id: objectId } as Partial<Customer>, user);
         break;
       case DELETE:
-        if (!objectId) throw new CustomAxiosError(`Failed to delete item: ${tableName}. Missing parameter: id`, { status: BadRequest });
+        if (!objectId) throw new CustomAxiosError(`Failed to delete item: ${pathFirst}. Missing parameter: id`, { status: BadRequest });
         result = await handleDelete(tableName, objectId, user);
         break;
       default:
