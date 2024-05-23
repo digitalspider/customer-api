@@ -1,4 +1,4 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { AttributeDefinition, CreateTableCommand, CreateTableCommandInput, CreateTableCommandOutput, DeleteTableCommand, DeleteTableCommandInput, DeleteTableCommandOutput, DescribeTableCommand, DescribeTableCommandInput, DescribeTableCommandOutput, DescribeTableInput, DynamoDBClient, GlobalSecondaryIndex, KeySchemaElement } from '@aws-sdk/client-dynamodb';
 import {
   BatchGetCommand,
   BatchGetCommandInput,
@@ -206,5 +206,75 @@ export async function batchGet(TableName: string, Keys: { [key: string]: string 
     },
   };
   const data = await ddbDocClient.send(new BatchGetCommand(params));
+  return data;
+}
+
+
+export async function describeTable(TableName: string): Promise<DescribeTableCommandOutput> {
+  const params: DescribeTableCommandInput = {
+    TableName,
+  };
+  const data = await ddbDocClient.send(new DescribeTableCommand(params));
+  return data;
+}
+
+export async function createTable(TableName: string): Promise<CreateTableCommandOutput> {
+  const KeySchema: KeySchemaElement[] = [
+    {
+      AttributeName: 'id',
+      KeyType: 'HASH',
+    }
+  ];
+  const AttributeDefinitions: AttributeDefinition[] = [
+    {
+      AttributeName: 'id',
+      AttributeType: 'S',
+    },
+    {
+      AttributeName: 'createdBy',
+      AttributeType: 'S',
+    },
+    {
+      AttributeName: 'groupId',
+      AttributeType: 'S',
+    }
+  ];
+  const GlobalSecondaryIndexes: GlobalSecondaryIndex[] = [
+    {
+      IndexName: 'createdBy-index',
+      KeySchema: [{
+        AttributeName: 'createdBy',
+        KeyType: 'HASH',
+      }],
+      Projection: {
+        ProjectionType: 'ALL'
+      }
+    },
+    {
+      IndexName: 'groupId-index',
+      KeySchema: [{
+        AttributeName: 'groupId',
+        KeyType: 'HASH',
+      }],
+      Projection: {
+        ProjectionType: 'ALL',
+      }
+    }
+  ];
+  const params: CreateTableCommandInput = {
+    TableName,
+    AttributeDefinitions,
+    KeySchema,
+    GlobalSecondaryIndexes,
+  };
+  const data = await ddbDocClient.send(new CreateTableCommand(params));
+  return data;
+}
+
+export async function deleteTable(TableName: string): Promise<DeleteTableCommandOutput> {
+  const params: DeleteTableCommandInput = {
+    TableName,
+  };
+  const data = await ddbDocClient.send(new DeleteTableCommand(params));
   return data;
 }
