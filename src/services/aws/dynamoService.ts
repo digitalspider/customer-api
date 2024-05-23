@@ -1,4 +1,4 @@
-import { AttributeDefinition, CreateTableCommand, CreateTableCommandInput, CreateTableCommandOutput, DeleteTableCommand, DeleteTableCommandInput, DeleteTableCommandOutput, DescribeTableCommand, DescribeTableCommandInput, DescribeTableCommandOutput, DescribeTableInput, DynamoDBClient, GlobalSecondaryIndex, KeySchemaElement } from '@aws-sdk/client-dynamodb';
+import { AttributeDefinition, CreateTableCommand, CreateTableCommandInput, CreateTableCommandOutput, DeleteTableCommand, DeleteTableCommandInput, DeleteTableCommandOutput, DescribeTableCommand, DescribeTableCommandInput, DescribeTableCommandOutput, DynamoDBClient, GlobalSecondaryIndex, KeySchemaElement } from '@aws-sdk/client-dynamodb';
 import {
   BatchGetCommand,
   BatchGetCommandInput,
