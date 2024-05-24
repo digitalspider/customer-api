@@ -318,22 +318,6 @@ Resources:
                     - ''
                     - - Fn::GetAtt: CustomerTable.Arn
                       - /index/*
-        - PolicyName:
-            Fn::Sub: tables-DynamoDBItemAccess-${AWSENV}
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - dynamodb:GetItem
-                  - dynamodb:PutItem
-                  - dynamodb:DeleteItem
-                  - dynamodb:UpdateItem
-                  - dynamodb:DescribeTable
-                  - dynamodb:CreateTable
-                Resource:
-                  - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*-staging
-                  - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*-staging/index/*
   CustomerLambdaIAMRole:
     Type: AWS::IAM::Role
     Properties:
@@ -394,6 +378,22 @@ Resources:
                     - ''
                     - - Fn::GetAtt: CustomerTable.Arn
                       - /index/*
+        - PolicyName:
+            Fn::Sub: tables-DynamoDBItemAccess-${AWSENV}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DescribeTable
+                  - dynamodb:CreateTable
+                Resource:
+                  - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*-staging
+                  - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*-staging/index/*
   #END: IAM Role
 
   #BEGIN: Secrets
