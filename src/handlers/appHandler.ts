@@ -105,18 +105,13 @@ export function validatePath(path: string): void {
 export async function validateOrCreateTable(tableName: string): Promise<void> {
   if (!tableName) return;
   try {
-    const tableExists = await describeTable(tableName);
-    console.debug('tableExists', tableExists);
+    const { Table } = await describeTable(tableName);
+    console.debug('tableExists', Table);
   } catch (e) {
-    console.error('error');
-    console.error(e);
-    console.error(typeof e);
-    console.error(e instanceof ResourceNotFoundException);
-    if (e instanceof ResourceNotFoundException) {
-      await createTable(tableName);
-    } else {
+    if (!(e instanceof ResourceNotFoundException)) {
       throw e;
     }
+    await createTable(tableName);
   }
 }
 

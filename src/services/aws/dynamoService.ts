@@ -263,6 +263,7 @@ export async function createTable(TableName: string): Promise<CreateTableCommand
   ];
   const params: CreateTableCommandInput = {
     TableName,
+    BillingMode: 'PAY_PER_REQUEST',
     AttributeDefinitions,
     KeySchema,
     GlobalSecondaryIndexes,
