@@ -8,6 +8,7 @@ import { Item } from '../services/dynamo/data';
 import { createResponse, parsePath } from '../services/utils';
 import { User } from '../types/auth';
 import { CustomAxiosError } from '../types/error';
+import { ResourceNotFoundException } from '@aws-sdk/client-dynamodb';
 
 const { Ok, MethodNotAllowed, InternalServerError, BadRequest, NotFound } = HttpStatusCode;
 const { GET, POST, PUT, DELETE } = HTTP_METHOD;
@@ -103,10 +104,19 @@ export function validatePath(path: string): void {
 
 export async function validateOrCreateTable(tableName: string): Promise<void> {
   if (!tableName) return;
-  const tableExists = await describeTable(tableName);
-  console.log(tableExists);
-  if (!tableExists) {
-    createTable(tableName);
+  try {
+    const tableExists = await describeTable(tableName);
+    console.debug('tableExists', tableExists);
+  } catch (e) {
+    console.error('error');
+    console.error(e);
+    console.error(typeof e);
+    console.error(e instanceof ResourceNotFoundException);
+    if (e instanceof ResourceNotFoundException) {
+      await createTable(tableName);
+    } else {
+      throw e;
+    }
   }
 }
 
