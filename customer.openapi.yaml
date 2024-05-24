@@ -5,6 +5,7 @@ info:
   description: Digital Spider Customers APIs
 tags:
   - name: Customer
+  - name: User
   - name: CORS
 
 # AWS Validators
@@ -187,6 +188,185 @@ paths:
         - Customer
       operationId: DeteteCustomer
       description: Delete an existing customer
+      responses:
+        200:
+          description: success
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+        401:
+          description: The request authorization is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorUnauthorized'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+  /user:
+    options:
+      tags:
+        - CORS
+      responses:
+        200:
+          description: success
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    post:
+      tags:
+        - User
+      operationId: CreateUser
+      description: Creates a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customerCreate'
+      responses:
+        200:
+          description: success
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    get:
+      tags:
+        - User
+      operationId: ListUsers
+      description: Provide a searchable list of users
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/customer'
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+        401:
+          description: The request authorization is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorUnauthorized'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+  /user/{uuid}:
+    parameters:
+      - in: path
+        name: uuid
+        description: The id of the user
+        schema:
+          $ref: '#/components/schemas/customerId'
+        required: true
+    options:
+      tags:
+        - CORS
+      responses:
+        200:
+          description: success
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    get:
+      tags:
+        - User
+      operationId: GetUser
+      description: Get details of the user
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/customer'
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+        401:
+          description: The request authorization is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorUnauthorized'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    put:
+      tags:
+        - User
+      operationId: UpdateUser
+      description: Update an existing user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customerCreate'
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/customer'
+        400:
+          description: The request couldn't be parsed or validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorData'
+        401:
+          description: The request authorization is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonErrorUnauthorized'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    delete:
+      tags:
+        - User
+      operationId: DeteteUser
+      description: Delete an existing user
       responses:
         200:
           description: success

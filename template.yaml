@@ -389,6 +389,8 @@ Resources:
                   - dynamodb:PutItem
                   - dynamodb:DeleteItem
                   - dynamodb:UpdateItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
                   - dynamodb:DescribeTable
                   - dynamodb:CreateTable
                 Resource:
@@ -637,6 +639,51 @@ Resources:
           Type: Api
           Properties:
             Path: /customer/{uuid}
+            Method: delete
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        CreateUser:
+          Type: Api
+          Properties:
+            Path: /user
+            Method: post
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        ListUsers:
+          Type: Api
+          Properties:
+            Path: /user
+            Method: get
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        GetUser:
+          Type: Api
+          Properties:
+            Path: /user/{uuid}
+            Method: get
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        UpdateUser:
+          Type: Api
+          Properties:
+            Path: /user/{uuid}
+            Method: put
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        DeleteUser:
+          Type: Api
+          Properties:
+            Path: /user/{uuid}
             Method: delete
             RestApiId:
               Ref: CustomerApi
