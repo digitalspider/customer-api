@@ -56,11 +56,13 @@ paths:
         200:
           description: success
         400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
       x-amazon-apigateway-request-validator: all
       x-amazon-apigateway-integration:
         httpMethod: POST
@@ -82,17 +84,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/customer'
         400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
+          $ref: '#/components/responses/BadRequest'
         401:
-          description: The request authorization is invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorUnauthorized'
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
       x-amazon-apigateway-integration:
         httpMethod: POST
         type: AWS_PROXY
@@ -131,17 +129,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/customer'
         400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
+          $ref: '#/components/responses/BadRequest'
         401:
-          description: The request authorization is invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorUnauthorized'
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
       x-amazon-apigateway-integration:
         httpMethod: POST
         type: AWS_PROXY
@@ -167,17 +161,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/customer'
         400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
+          $ref: '#/components/responses/BadRequest'
         401:
-          description: The request authorization is invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorUnauthorized'
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
       x-amazon-apigateway-integration:
         httpMethod: POST
         type: AWS_PROXY
@@ -192,17 +182,13 @@ paths:
         200:
           description: success
         400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
+          $ref: '#/components/responses/BadRequest'
         401:
-          description: The request authorization is invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorUnauthorized'
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
       x-amazon-apigateway-integration:
         httpMethod: POST
         type: AWS_PROXY
@@ -235,11 +221,13 @@ paths:
         200:
           description: success
         400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
       x-amazon-apigateway-request-validator: all
       x-amazon-apigateway-integration:
         httpMethod: POST
@@ -261,17 +249,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/customer'
         400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
+          $ref: '#/components/responses/BadRequest'
         401:
-          description: The request authorization is invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorUnauthorized'
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
       x-amazon-apigateway-integration:
         httpMethod: POST
         type: AWS_PROXY
@@ -310,17 +294,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/customer'
         400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
+          $ref: '#/components/responses/BadRequest'
         401:
-          description: The request authorization is invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorUnauthorized'
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
       x-amazon-apigateway-integration:
         httpMethod: POST
         type: AWS_PROXY
@@ -346,17 +326,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/customer'
         400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
+          $ref: '#/components/responses/BadRequest'
         401:
-          description: The request authorization is invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorUnauthorized'
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
       x-amazon-apigateway-integration:
         httpMethod: POST
         type: AWS_PROXY
@@ -371,17 +347,13 @@ paths:
         200:
           description: success
         400:
-          description: The request couldn't be parsed or validated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorData'
+          $ref: '#/components/responses/BadRequest'
         401:
-          description: The request authorization is invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonErrorUnauthorized'
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
       x-amazon-apigateway-integration:
         httpMethod: POST
         type: AWS_PROXY
@@ -397,6 +369,31 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  responses:
+    BadRequest:
+      description: There was an error with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/commonErrorData'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/commonErrorData'
+    DefaultError:
+      description: There was an error with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/commonErrorData'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/commonErrorUnauthorized'
   schemas:
     commonErrorData:
       type: object
