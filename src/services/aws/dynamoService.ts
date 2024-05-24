@@ -1,4 +1,4 @@
-import { AttributeDefinition, CreateTableCommand, CreateTableCommandInput, CreateTableCommandOutput, DeleteTableCommand, DeleteTableCommandInput, DeleteTableCommandOutput, DescribeTableCommand, DescribeTableCommandInput, DescribeTableCommandOutput, DynamoDBClient, GlobalSecondaryIndex, KeySchemaElement } from '@aws-sdk/client-dynamodb';
+import { AttributeDefinition, CreateTableCommand, CreateTableCommandInput, CreateTableCommandOutput, DeleteTableCommand, DeleteTableCommandInput, DeleteTableCommandOutput, DescribeTableCommand, DescribeTableCommandInput, DescribeTableCommandOutput, DynamoDBClient, GlobalSecondaryIndex, KeySchemaElement, waitUntilTableExists } from '@aws-sdk/client-dynamodb';
 import {
   BatchGetCommand,
   BatchGetCommandInput,
@@ -214,7 +214,7 @@ export async function describeTable(TableName: string): Promise<DescribeTableCom
   const params: DescribeTableCommandInput = {
     TableName,
   };
-  const data = await ddbDocClient.send(new DescribeTableCommand(params));
+  const data = await ddbClient.send(new DescribeTableCommand(params));
   return data;
 }
 
@@ -268,7 +268,12 @@ export async function createTable(TableName: string): Promise<CreateTableCommand
     KeySchema,
     GlobalSecondaryIndexes,
   };
-  const data = await ddbDocClient.send(new CreateTableCommand(params));
+  const data = await ddbClient.send(new CreateTableCommand(params));
+  const results = await waitUntilTableExists({client: ddbClient, maxWaitTime: 120}, {TableName});
+  if (results.state == 'SUCCESS') {
+    return data;
+  }
+  console.error(`Failed creating table ${TableName} state=${results.state} reason=${results.reason}`);
   return data;
 }
 
@@ -276,6 +281,6 @@ export async function deleteTable(TableName: string): Promise<DeleteTableCommand
   const params: DeleteTableCommandInput = {
     TableName,
   };
-  const data = await ddbDocClient.send(new DeleteTableCommand(params));
+  const data = await ddbClient.send(new DeleteTableCommand(params));
   return data;
 }
