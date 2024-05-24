@@ -2,6 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda
 import { HttpStatusCode } from 'axios';
 import { AWSENV } from '../common/config';
 import { HTTP_METHOD } from '../common/constants';
+import { createTable, describeTable } from '../services/aws/dynamoService';
 import { ListResults, createData, deleteData, getData, listData, updateData } from '../services/dataService';
 import { Item } from '../services/dynamo/data';
 import { createResponse, parsePath } from '../services/utils';
@@ -36,6 +37,8 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
 
   try {
     let result;
+    await validatePath(pathFirst);
+    await validateOrCreateTable(tableName);
     switch (httpMethod) {
       case GET:
         if (path.endsWith(`/${pathFirst}`)) {
@@ -91,6 +94,20 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
 
 function getTableName(tableName: string, tenantId?: string): string {
   return tenantId && tableName ? `${tenantId}-${tableName}-${AWSENV}` : tableName ? `${tableName}-${AWSENV}` : '';
+}
+
+export function validatePath(path: string): void {
+  const validPaths = 'customer,user,group,table,order,activity,object,inbox,outbox,message,data,product,price,category,event'.split(',');
+  if (!validPaths.includes(path)) throw new CustomAxiosError(`Invalid path ${path}. Expected: ${validPaths}`, { status: BadRequest });
+}
+
+export async function validateOrCreateTable(tableName: string): Promise<void> {
+  if (!tableName) return;
+  const tableExists = await describeTable(tableName);
+  console.log(tableExists);
+  if (!tableExists) {
+    createTable(tableName);
+  }
 }
 
 export async function handleList(tableName: string, user: User): Promise<ListResults> {
