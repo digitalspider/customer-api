@@ -689,6 +689,141 @@ Resources:
               Ref: CustomerApi
             Stage:
               Ref: StageName
+        CreateGroup:
+          Type: Api
+          Properties:
+            Path: /group
+            Method: post
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        ListGroups:
+          Type: Api
+          Properties:
+            Path: /group
+            Method: get
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        GetGroup:
+          Type: Api
+          Properties:
+            Path: /group/{uuid}
+            Method: get
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        UpdateGroup:
+          Type: Api
+          Properties:
+            Path: /group/{uuid}
+            Method: put
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        DeleteGroup:
+          Type: Api
+          Properties:
+            Path: /group/{uuid}
+            Method: delete
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        CreateActivity:
+          Type: Api
+          Properties:
+            Path: /activity
+            Method: post
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        ListActivities:
+          Type: Api
+          Properties:
+            Path: /activity
+            Method: get
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        GetActivity:
+          Type: Api
+          Properties:
+            Path: /activity/{uuid}
+            Method: get
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        UpdateActivity:
+          Type: Api
+          Properties:
+            Path: /activity/{uuid}
+            Method: put
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        DeleteActivity:
+          Type: Api
+          Properties:
+            Path: /activity/{uuid}
+            Method: delete
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        CreateObject:
+          Type: Api
+          Properties:
+            Path: /object
+            Method: post
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        ListObjects:
+          Type: Api
+          Properties:
+            Path: /object
+            Method: get
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        GetObject:
+          Type: Api
+          Properties:
+            Path: /object/{uuid}
+            Method: get
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        UpdateObject:
+          Type: Api
+          Properties:
+            Path: /object/{uuid}
+            Method: put
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
+        DeleteObject:
+          Type: Api
+          Properties:
+            Path: /object/{uuid}
+            Method: delete
+            RestApiId:
+              Ref: CustomerApi
+            Stage:
+              Ref: StageName
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
