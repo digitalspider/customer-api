@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { HttpStatusCode } from 'axios';
-import { AWSENV } from '../common/config';
+import { AWSENV, VALID_PATHS } from '../common/config';
 import { HTTP_METHOD } from '../common/constants';
 import { createTable, describeTable } from '../services/aws/dynamoService';
 import { ListResults, createData, deleteData, getData, listData, updateData } from '../services/dataService';
@@ -10,7 +10,7 @@ import { User } from '../types/auth';
 import { CustomAxiosError } from '../types/error';
 import { ResourceNotFoundException } from '@aws-sdk/client-dynamodb';
 
-const { Ok, MethodNotAllowed, InternalServerError, BadRequest, NotFound } = HttpStatusCode;
+const { Ok, MethodNotAllowed, InternalServerError, BadRequest, PreconditionFailed } = HttpStatusCode;
 const { GET, POST, PUT, DELETE } = HTTP_METHOD;
 
 export async function handleEvent(event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> {
@@ -98,20 +98,23 @@ function getTableName(tableName: string, tenantId?: string): string {
 }
 
 export function validatePath(path: string): void {
-  const validPaths = 'customer,user,group,table,order,activity,object,inbox,outbox,message,data,product,price,category,event'.split(',');
+  const validPaths = VALID_PATHS.trim().replace(/\s+/,'').split(',');
   if (!validPaths.includes(path)) throw new CustomAxiosError(`Invalid path ${path}. Expected: ${validPaths}`, { status: BadRequest });
 }
 
 export async function validateOrCreateTable(tableName: string): Promise<void> {
   if (!tableName) return;
   try {
-    await describeTable(tableName);
+    const { Table = {} } = await describeTable(tableName);
+    const { TableStatus } = Table;
+    if (TableStatus !== 'ACTIVE') throw new CustomAxiosError('Table creation in progress. Please wait and try again', { status: PreconditionFailed, data: tableName })
   } catch (e) {
     if (!(e instanceof ResourceNotFoundException)) {
       throw e;
     }
     console.debug(`Table does not exist. Creating table: ${tableName}`);
     await createTable(tableName);
+    throw new CustomAxiosError('Table creation in progress. Please wait and try again', { status: PreconditionFailed, data: tableName })
   }
 }
 

@@ -21,6 +21,10 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { AWS } from '../../common/constants';
 
+type CreateTableOptions = {
+  waitUntilTableCreated?: boolean;
+};
+
 const { AWS_REGION_APSE2 } = AWS.REGIONS;
 
 // see https://github.com/aws/aws-sdk-js-v3/tree/main/lib/lib-dynamodb
@@ -218,7 +222,8 @@ export async function describeTable(TableName: string): Promise<DescribeTableCom
   return data;
 }
 
-export async function createTable(TableName: string): Promise<CreateTableCommandOutput> {
+export async function createTable(TableName: string, options?: CreateTableOptions): Promise<CreateTableCommandOutput> {
+  const { waitUntilTableCreated = false } = options || {};
   const KeySchema: KeySchemaElement[] = [
     {
       AttributeName: 'id',
@@ -269,11 +274,13 @@ export async function createTable(TableName: string): Promise<CreateTableCommand
     GlobalSecondaryIndexes,
   };
   const data = await ddbClient.send(new CreateTableCommand(params));
-  const results = await waitUntilTableExists({client: ddbClient, maxWaitTime: 120}, {TableName});
-  if (results.state == 'SUCCESS') {
-    return data;
+  if (waitUntilTableCreated) {
+    const results = await waitUntilTableExists({client: ddbClient, maxWaitTime: 120}, {TableName});
+    if (results.state == 'SUCCESS') {
+      return data;
+    }
+    throw new Error(`Failed creating table ${TableName} state=${results.state} reason=${results.reason}`);
   }
-  console.error(`Failed creating table ${TableName} state=${results.state} reason=${results.reason}`);
   return data;
 }
 
