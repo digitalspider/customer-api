@@ -360,6 +360,504 @@ paths:
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
 
+  /group:
+    options:
+      tags:
+        - CORS
+      responses:
+        200:
+          description: success
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    post:
+      tags:
+        - Group
+      operationId: CreateGroup
+      description: Creates a new group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customerCreate'
+      responses:
+        200:
+          description: success
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    get:
+      tags:
+        - Group
+      operationId: ListGroups
+      description: Provide a searchable list of groups
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/customer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+  /group/{uuid}:
+    parameters:
+      - in: path
+        name: uuid
+        description: The id of the group
+        schema:
+          $ref: '#/components/schemas/customerId'
+        required: true
+    options:
+      tags:
+        - CORS
+      responses:
+        200:
+          description: success
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    get:
+      tags:
+        - Group
+      operationId: GetGroup
+      description: Get details of the group
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/customer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    put:
+      tags:
+        - Group
+      operationId: UpdateGroup
+      description: Update an existing group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customerCreate'
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/customer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    delete:
+      tags:
+        - Group
+      operationId: DeteteGroup
+      description: Delete an existing group
+      responses:
+        200:
+          description: success
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+
+  /activity:
+    options:
+      tags:
+        - CORS
+      responses:
+        200:
+          description: success
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    post:
+      tags:
+        - Activity
+      operationId: CreateActivity
+      description: Creates a new activity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customerCreate'
+      responses:
+        200:
+          description: success
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    get:
+      tags:
+        - Activity
+      operationId: ListActivities
+      description: Provide a searchable list of activities
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/customer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+  /activity/{uuid}:
+    parameters:
+      - in: path
+        name: uuid
+        description: The id of the activity
+        schema:
+          $ref: '#/components/schemas/customerId'
+        required: true
+    options:
+      tags:
+        - CORS
+      responses:
+        200:
+          description: success
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    get:
+      tags:
+        - Activity
+      operationId: GetActivity
+      description: Get details of the activity
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/customer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    put:
+      tags:
+        - Activity
+      operationId: UpdateActivity
+      description: Update an existing activity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customerCreate'
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/customer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    delete:
+      tags:
+        - Activity
+      operationId: DeteteActivity
+      description: Delete an existing activity
+      responses:
+        200:
+          description: success
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+
+  /object:
+    options:
+      tags:
+        - CORS
+      responses:
+        200:
+          description: success
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    post:
+      tags:
+        - Object
+      operationId: CreateObject
+      description: Creates a new object
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customerCreate'
+      responses:
+        200:
+          description: success
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    get:
+      tags:
+        - Object
+      operationId: ListObjects
+      description: Provide a searchable list of objects
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/customer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+  /object/{uuid}:
+    parameters:
+      - in: path
+        name: uuid
+        description: The id of the object
+        schema:
+          $ref: '#/components/schemas/customerId'
+        required: true
+    options:
+      tags:
+        - CORS
+      responses:
+        200:
+          description: success
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    get:
+      tags:
+        - Object
+      operationId: GetObject
+      description: Get details of the object
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/customer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    put:
+      tags:
+        - Object
+      operationId: UpdateObject
+      description: Update an existing object
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customerCreate'
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/customer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+    delete:
+      tags:
+        - Object
+      operationId: DeteteObject
+      description: Delete an existing object
+      responses:
+        200:
+          description: success
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: AWS_PROXY
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
+
 security:
   - jwtBearerAuth: []
 
