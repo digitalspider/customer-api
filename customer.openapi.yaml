@@ -267,7 +267,7 @@ paths:
         name: uuid
         description: The id of the user
         schema:
-          $ref: '#/components/schemas/customerId'
+          $ref: '#/components/schemas/userId'
         required: true
     options:
       tags:
@@ -433,7 +433,7 @@ paths:
         name: uuid
         description: The id of the group
         schema:
-          $ref: '#/components/schemas/customerId'
+          $ref: '#/components/schemas/groupId'
         required: true
     options:
       tags:
@@ -599,7 +599,7 @@ paths:
         name: uuid
         description: The id of the activity
         schema:
-          $ref: '#/components/schemas/customerId'
+          $ref: '#/components/schemas/activityId'
         required: true
     options:
       tags:
@@ -765,7 +765,7 @@ paths:
         name: uuid
         description: The id of the object
         schema:
-          $ref: '#/components/schemas/customerId'
+          $ref: '#/components/schemas/objectId'
         required: true
     options:
       tags:
@@ -934,6 +934,30 @@ components:
       pattern: '^[a-zA-Z0-9-_]+$'
       readOnly: true
       example: "{{customerId}}"
+    userId:
+      type: string
+      description: An identifier for an external facing entity.\nThis field is generated and cannot be set or edited. Used for lookups, updates, and deletes
+      pattern: '^[a-zA-Z0-9-_]+$'
+      readOnly: true
+      example: "{{userId}}"
+    groupId:
+      type: string
+      description: An identifier for an external facing entity.\nThis field is generated and cannot be set or edited. Used for lookups, updates, and deletes
+      pattern: '^[a-zA-Z0-9-_]+$'
+      readOnly: true
+      example: "{{groupId}}"
+    activityId:
+      type: string
+      description: An identifier for an external facing entity.\nThis field is generated and cannot be set or edited. Used for lookups, updates, and deletes
+      pattern: '^[a-zA-Z0-9-_]+$'
+      readOnly: true
+      example: "{{activityId}}"
+    objectId:
+      type: string
+      description: An identifier for an external facing entity.\nThis field is generated and cannot be set or edited. Used for lookups, updates, and deletes
+      pattern: '^[a-zA-Z0-9-_]+$'
+      readOnly: true
+      example: "{{objectId}}"
     tenantId:
       type: string
       description: A identifier of the tenancy of the customer
