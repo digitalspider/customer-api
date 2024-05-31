@@ -19,7 +19,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
   const { authorizer } = requestContext || {};
   const { tenantId, username, userId, claims: claimsInput = '' } = authorizer || {};
   const user: User = { tenantId, username, userId, claims: claimsInput.trim().split(',') };
-  const { uuid: objectId } = pathParameters || {};
+  const { uuid: objectId, objectType } = pathParameters || {};
   const body = bodyString ? JSON.parse(bodyString) : undefined;
   const { pathParts, pathFirst = '' } = parsePath(path);
   const tableName = getTableName(pathFirst, tenantId);
@@ -30,6 +30,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
     awsRequestId,
     user,
     objectId,
+    objectType,
     tableName,
     pathParts,
     pathFirst,

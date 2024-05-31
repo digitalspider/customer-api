@@ -644,145 +644,10 @@ Resources:
               Ref: CustomerApi
             Stage:
               Ref: StageName
-        CreateUser:
-          Type: Api
-          Properties:
-            Path: /user
-            Method: post
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        ListUsers:
-          Type: Api
-          Properties:
-            Path: /user
-            Method: get
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        GetUser:
-          Type: Api
-          Properties:
-            Path: /user/{uuid}
-            Method: get
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        UpdateUser:
-          Type: Api
-          Properties:
-            Path: /user/{uuid}
-            Method: put
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        DeleteUser:
-          Type: Api
-          Properties:
-            Path: /user/{uuid}
-            Method: delete
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        CreateGroup:
-          Type: Api
-          Properties:
-            Path: /group
-            Method: post
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        ListGroups:
-          Type: Api
-          Properties:
-            Path: /group
-            Method: get
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        GetGroup:
-          Type: Api
-          Properties:
-            Path: /group/{uuid}
-            Method: get
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        UpdateGroup:
-          Type: Api
-          Properties:
-            Path: /group/{uuid}
-            Method: put
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        DeleteGroup:
-          Type: Api
-          Properties:
-            Path: /group/{uuid}
-            Method: delete
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        CreateActivity:
-          Type: Api
-          Properties:
-            Path: /activity
-            Method: post
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        ListActivities:
-          Type: Api
-          Properties:
-            Path: /activity
-            Method: get
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        GetActivity:
-          Type: Api
-          Properties:
-            Path: /activity/{uuid}
-            Method: get
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        UpdateActivity:
-          Type: Api
-          Properties:
-            Path: /activity/{uuid}
-            Method: put
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
-        DeleteActivity:
-          Type: Api
-          Properties:
-            Path: /activity/{uuid}
-            Method: delete
-            RestApiId:
-              Ref: CustomerApi
-            Stage:
-              Ref: StageName
         CreateObject:
           Type: Api
           Properties:
-            Path: /object
+            Path: /{objectType}
             Method: post
             RestApiId:
               Ref: CustomerApi
@@ -791,7 +656,7 @@ Resources:
         ListObjects:
           Type: Api
           Properties:
-            Path: /object
+            Path: /{objectType}
             Method: get
             RestApiId:
               Ref: CustomerApi
@@ -800,7 +665,7 @@ Resources:
         GetObject:
           Type: Api
           Properties:
-            Path: /object/{uuid}
+            Path: /{objectType}/{uuid}
             Method: get
             RestApiId:
               Ref: CustomerApi
@@ -809,7 +674,7 @@ Resources:
         UpdateObject:
           Type: Api
           Properties:
-            Path: /object/{uuid}
+            Path: /{objectType}/{uuid}
             Method: put
             RestApiId:
               Ref: CustomerApi
@@ -818,7 +683,7 @@ Resources:
         DeleteObject:
           Type: Api
           Properties:
-            Path: /object/{uuid}
+            Path: /{objectType}/{uuid}
             Method: delete
             RestApiId:
               Ref: CustomerApi
