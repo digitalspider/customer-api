@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { User } from '../types/auth';
 import { CustomAxiosError } from '../types/error';
 import * as dynamo from './dynamo/data';
+import { cleanTags } from './utils';
 
 const { NotFound, Forbidden } = HttpStatusCode;
 
@@ -57,17 +58,18 @@ export async function getData(tableName: string, id: string, user: User, require
 }
 
 export async function createData(tableName: string, itemData: Item, user: User): Promise<Item> {
-  const { id = uuidv4() } = itemData;
+  const { id = uuidv4(), tags } = itemData;
   const { userId } = user;
-  const item = { id, createdBy: userId, payload: cleanInput(itemData) };
+  const item = { id, createdBy: userId, tags: cleanTags(tags), payload: cleanInput(itemData) };
   return await dynamo.createItem(tableName, item);
 }
 
 export async function updateData(tableName: string, itemData: Partial<Item>, user: User): Promise<Item> {
-  const { id } = itemData;
+  const { id, tags } = itemData;
   if (!id) throw new Error(`Cannot update ${tableName} without required properties: id`);
-  await getData(tableName, id, user, 'write');
-  const item = { id, updatedBy: user.userId, payload: cleanInput(itemData) };
+  const existing = await getData(tableName, id, user, 'write');
+  const updatedTags = existing.tags ? [existing.tags, tags].join(',') : tags;
+  const item = { id, updatedBy: user.userId, tags: cleanTags(updatedTags), payload: cleanInput(itemData) };
   return dynamo.updateItem(tableName, item);
 }
 
@@ -79,6 +81,6 @@ export async function deleteData(tableName: string, id: string, user: User): Pro
 }
 
 function cleanInput(input: Partial<Item>): Partial<Omit<Item, 'createdBy' | 'id'>> {
-  const { id, createdBy, createdAt, updatedBy, updatedAt, deletedBy, deletedAt, groupId, ...validInput } = input; // eslint-disable-line
+  const { id, groupId, createdBy, createdAt, updatedBy, updatedAt, deletedBy, deletedAt, tags, ...validInput } = input; // eslint-disable-line
   return validInput;
 }

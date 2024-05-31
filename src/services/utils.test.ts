@@ -1,6 +1,6 @@
 import { HttpStatusCode } from 'axios';
 import { CustomAxiosError } from '../types/error';
-import { createResponse, groupSettledPromises, parsePath, sleep } from './utils';
+import { cleanTags, createResponse, groupSettledPromises, parsePath, sleep } from './utils';
 
 describe('Test utils', () => {
   it('sleep()', async () => {
@@ -53,6 +53,14 @@ describe('Test utils', () => {
     expect(parsePath('/v1/auth/test', 'auth')).toEqual({ pathParts: ['auth','test'], pathFirst: 'auth' });
     expect(() => {parsePath('/v1/xyz/test', 'auth')}).toThrow(CustomAxiosError);
     expect(parsePath('/v2/customer/try/this', 'customer')).toEqual({ pathParts: ['customer','try','this'], pathFirst: 'customer' });
-    
+  });
+
+  it('cleanTags()', async () => {
+    expect(cleanTags(undefined)).toEqual('');
+    expect(cleanTags('')).toEqual('');
+    expect(cleanTags('tag')).toEqual('tag');
+    expect(cleanTags('tag , a , b')).toEqual('a,b,tag');
+    expect(cleanTags('tag , a, $tag, #a')).toEqual('a,tag');
+    expect(cleanTags(', , ,abc, #23$4, , ,')).toEqual('abc');
   });
 });

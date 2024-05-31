@@ -59,3 +59,13 @@ export function parsePath(path: string, expectedPrefix?: string) {
   const pathFirst = pathParts?.length ? pathParts[0] : undefined;
   return { pathParts, pathFirst };
 }
+
+function onlyUnique(value: string, index: number, array: string[]) {
+  return array.indexOf(value) === index;
+}
+
+export function cleanTags(input?: string): string {
+  if (!input) return input || '';
+  const tagString = input.toLowerCase().replace(/\s+/, '').replace(/[^a-z,]/g, '').replace(/,{2,}/g,',').replace(/^,|,$/g,'');
+  return tagString.split(',').sort().filter(onlyUnique).join(',');
+}
