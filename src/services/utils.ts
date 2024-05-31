@@ -54,7 +54,7 @@ export function parsePath(path: string, expectedPrefix?: string) {
   if (pathParts?.length && pathParts[0].match(/v\d+/)) { pathParts.shift() }
   if (expectedPrefix) {
     if (pathParts?.length && pathParts[0] !== expectedPrefix ) throw new CustomAxiosError(`Invalid path: ${path}, expected ${expectedPrefix}`, { status: BadRequest });
-    if (pathParts?.length && pathParts[0] === expectedPrefix ) { pathParts.shift() };
+    if (pathParts?.length && pathParts[0] === expectedPrefix ) {}; // { pathParts.shift() };
   }
   const pathFirst = pathParts?.length ? pathParts[0] : undefined;
   return { pathParts, pathFirst };

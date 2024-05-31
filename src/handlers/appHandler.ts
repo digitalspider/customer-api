@@ -21,7 +21,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
   const user: User = { tenantId, username, userId, claims: claimsInput.trim().split(',') };
   const { uuid: objectId, objectType } = pathParameters || {};
   const body = bodyString ? JSON.parse(bodyString) : undefined;
-  const { pathParts, pathFirst = '' } = parsePath(path);
+  const { pathParts, pathFirst = '' } = parsePath(path, objectType);
   const tableName = getTableName(pathFirst, tenantId);
   console.debug('request', {
     handler: 'appHandler',

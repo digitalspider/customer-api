@@ -50,9 +50,9 @@ describe('Test utils', () => {
     expect(parsePath('/v1')).toEqual({ pathParts: [] });
     expect(parsePath('/v30')).toEqual({ pathParts: [] });
     expect(parsePath('/auth')).toEqual({ pathParts: ['auth'], pathFirst: 'auth' });
-    expect(parsePath('/v1/auth/test', 'auth')).toEqual({ pathParts: ['test'], pathFirst: 'test' });
+    expect(parsePath('/v1/auth/test', 'auth')).toEqual({ pathParts: ['auth','test'], pathFirst: 'auth' });
     expect(() => {parsePath('/v1/xyz/test', 'auth')}).toThrow(CustomAxiosError);
-    expect(parsePath('/v2/customer/try/this', 'customer')).toEqual({ pathParts: ['try', 'this'], pathFirst: 'try' });
+    expect(parsePath('/v2/customer/try/this', 'customer')).toEqual({ pathParts: ['customer','try','this'], pathFirst: 'customer' });
     
   });
 });
