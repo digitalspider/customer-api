@@ -59,7 +59,7 @@ export async function getData(tableName: string, id: string, user: User, require
 export async function createData(tableName: string, itemData: Item, user: User): Promise<Item> {
   const { id = uuidv4() } = itemData;
   const { userId } = user;
-  const item = { id, createdBy: userId, ...cleanInput(itemData) };
+  const item = { id, createdBy: userId, payload: cleanInput(itemData) };
   return await dynamo.createItem(tableName, item);
 }
 
@@ -67,7 +67,7 @@ export async function updateData(tableName: string, itemData: Partial<Item>, use
   const { id } = itemData;
   if (!id) throw new Error(`Cannot update ${tableName} without required properties: id`);
   await getData(tableName, id, user, 'write');
-  const item = { id, updatedBy: user.userId, ...cleanInput(itemData) };
+  const item = { id, updatedBy: user.userId, payload: cleanInput(itemData) };
   return dynamo.updateItem(tableName, item);
 }
 
@@ -79,6 +79,6 @@ export async function deleteData(tableName: string, id: string, user: User): Pro
 }
 
 function cleanInput(input: Partial<Item>): Partial<Omit<Item, 'createdBy' | 'id'>> {
-  const { createdBy, id, ...validInput } = input; // eslint-disable-line
+  const { id, createdBy, createdAt, updatedBy, updatedAt, deletedBy, deletedAt, groupId, ...validInput } = input; // eslint-disable-line
   return validInput;
 }
