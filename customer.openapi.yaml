@@ -692,7 +692,14 @@ paths:
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
 
-  /object:
+  /{objectType}:
+    parameters:
+      - in: path
+        name: objectType
+        description: The type of the object
+        schema:
+          $ref: '#/components/schemas/objectId'
+        required: true
     options:
       tags:
         - CORS
@@ -759,8 +766,14 @@ paths:
         type: AWS_PROXY
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerApiFunction.Arn}/invocations
-  /object/{uuid}:
+  /{objectType}/{uuid}:
     parameters:
+      - in: path
+        name: objectType
+        description: The type of the object
+        schema:
+          $ref: '#/components/schemas/objectId'
+        required: true
       - in: path
         name: uuid
         description: The id of the object
