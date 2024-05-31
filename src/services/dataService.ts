@@ -68,8 +68,10 @@ export async function updateData(tableName: string, itemData: Partial<Item>, use
   const { id, tags } = itemData;
   if (!id) throw new Error(`Cannot update ${tableName} without required properties: id`);
   const existing = await getData(tableName, id, user, 'write');
-  const updatedTags = existing.tags ? [existing.tags, tags].join(',') : tags;
-  const item = { id, updatedBy: user.userId, tags: cleanTags(updatedTags), payload: cleanInput(itemData) };
+  const { tags: existingTags, payload: existingPayload } = existing;
+  const updatedTags = existingTags ? [existingTags, tags].join(',') : tags;
+  const payload = { ...existingPayload, ...cleanInput(itemData) };
+  const item = { id, updatedBy: user.userId, tags: cleanTags(updatedTags), payload };
   return dynamo.updateItem(tableName, item);
 }
 
