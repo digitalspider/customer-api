@@ -60,7 +60,8 @@ export async function getData(tableName: string, id: string, user: User, require
 export async function createData(tableName: string, itemData: Item, user: User): Promise<Item> {
   const { id = uuidv4(), tags } = itemData;
   const { userId } = user;
-  const item = { id, createdBy: userId, tags: cleanTags(tags), payload: cleanInput(itemData) };
+  const payload = cleanInput(itemData);
+  const item = { id, createdBy: userId, tags: cleanTags(tags), payload };
   return await dynamo.createItem(tableName, item);
 }
 
