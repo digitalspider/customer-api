@@ -12,6 +12,7 @@ export async function encryptItem(inputData: Item, user: User): Promise<Item> {
 }
 
 export async function decryptItem(inputData: Item, user: User): Promise<Item> {
+  console.debug("decrypt called: ", { inputData, user });
   const { publicKey, privateKey } = user || {};
   const { encPayload, ...restOfInput } = inputData || {};
   if (!publicKey || !privateKey || !encPayload) return inputData;

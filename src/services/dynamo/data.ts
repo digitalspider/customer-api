@@ -15,7 +15,7 @@ export type Item = AuditData & DataKey & {
   groupId?: string;
   tags?: string;
   payload?: any;
-  encPayload?: any;
+  encPayload?: string;
 };
 
 type KeyValue = {
