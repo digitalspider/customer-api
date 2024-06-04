@@ -3,7 +3,7 @@ import { HttpStatusCode } from 'axios';
 import { JwtPayload } from 'jsonwebtoken';
 import { HTTP_METHOD } from '../common/constants';
 import { createItem, createJwt, extractToken, getItemByUsername, mapAuthToToken, verifyToken } from '../services/authService';
-import { hash } from '../services/cryptoService';
+import { createRSAKeyPair, hash } from '../services/crypto/cryptoService';
 import { updateItem } from '../services/dynamo/auth';
 import { createResponse, parsePath } from '../services/utils';
 import { Auth, LoginInput } from '../types/auth';
@@ -55,7 +55,8 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
             const existingUser = await getItemByUsername(username);
             if (existingUser) throw new CustomAxiosError('Failed to signup. User already exists', { status: BadRequest, data: { username } });
             const expiryInSec = expiryInSecInput && !isNaN(expiryInSecInput) ? Math.max(1, Math.min(24*3600, expiryInSecInput)) : undefined;
-            const userData: Partial<Auth> = { username, password, expiryInSec, ...safeBody };
+            const { publicKey, privateKey } = createRSAKeyPair();
+            const userData: Partial<Auth> = { ...safeBody, username, password, expiryInSec, publicKey, privateKey };
             const user = await createItem(userData);
             if (!user) throw new CustomAxiosError('Failed to create new user', { status: BadRequest, data: { username } });
             const token = await handleCreateJwt({ username, password, expiryInSec } as LoginInput);

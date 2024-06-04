@@ -13,7 +13,9 @@ export type AuditData = {
 };
 export type Item = AuditData & DataKey & {
   groupId?: string;
-  [x: string]: any; // eslint-disable-line
+  tags?: string;
+  payload?: any;
+  encPayload?: any;
 };
 
 type KeyValue = {

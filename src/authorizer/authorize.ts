@@ -47,7 +47,7 @@ export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Prom
   const { sub: principalId, aud: tenantId, context } = tokenData || {};
   if (principalId) {
     console.log(`Authorization valid. principalId=${principalId}, tenantId=${tenantId}`);
-    const { username, email, mobile, claims } = await getItem({ userId: principalId });
+    const { username, email, mobile, claims, publicKey, privateKey } = await getItem({ userId: principalId });
     if (!username) {
       console.error(`Cannot find auth, by userId: ${principalId}`);
       return generatePolicy(principalId, 'Deny', methodArn);
@@ -60,6 +60,8 @@ export async function handleEvent(event: APIGatewayRequestAuthorizerEvent): Prom
       userId: principalId,
       tenantId,
       claims,
+      publicKey,
+      privateKey,
     });
   }
   console.log(`Authorization denied. principalId=${principalId}`);

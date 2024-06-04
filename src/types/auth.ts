@@ -13,6 +13,8 @@ export type User = {
   username?: string;
   tenantId?: string;
   claims?: string[];
+  publicKey?: string;
+  privateKey?: string;
 };
 
 export type Auth = User & {
@@ -21,5 +23,8 @@ export type Auth = User & {
   email?: string;
   mobile?: string;
   context?: Context;
+  claims?: string;
+  publicKey?: string;
+  privateKey?: string;
   [x: string]: any; // eslint-disable-line
 };

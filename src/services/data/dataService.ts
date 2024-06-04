@@ -1,9 +1,10 @@
 import { HttpStatusCode } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { User } from '../types/auth';
-import { CustomAxiosError } from '../types/error';
-import * as dynamo from './dynamo/data';
-import { cleanTags } from './utils';
+import { User } from '../../types/auth';
+import { CustomAxiosError } from '../../types/error';
+import * as dynamo from '../dynamo/data';
+import { cleanTags } from '../utils';
+import { decryptItem, decryptList, encryptItem } from './cryptoDataService';
 
 const { NotFound, Forbidden } = HttpStatusCode;
 
@@ -25,7 +26,8 @@ export async function listData(tableName: string, user: User): Promise<ListResul
   const ExpressionAttributeValues = { ':createdBy': userId };
   const userResults = await dynamo.queryIndex(tableName, indexName, KeyConditionExpression, ExpressionAttributeValues);
   const total = (userResults || []).length || 0;
-  const results: ListResults = { total, self: { total, data: userResults }};
+  const data = await decryptList(userResults, user);
+  const results: ListResults = { total, self: { total, data }};
   let groupsTotal = 0;
   const promises = claims.filter(claim => claim.endsWith(':read')).map(async (claim) => {
     const groupId = claim.replace(':read', '');
@@ -34,7 +36,8 @@ export async function listData(tableName: string, user: User): Promise<ListResul
     const ExpressionAttributeValues = { ':groupId': groupId };
     const groupResults = (await dynamo.queryIndex(tableName, indexName, KeyConditionExpression, ExpressionAttributeValues)) || [];
     const { length: groupTotal = 0 } = groupResults;
-    results[groupId] = { total: groupTotal, data: groupResults };
+    const data = await decryptList(groupResults, user);
+    results[groupId] = { total: groupTotal, data };
     groupsTotal += groupTotal;
   });
   await Promise.all(promises);
@@ -54,7 +57,7 @@ export async function getData(tableName: string, id: string, user: User, require
   if (!groupId || !claims.includes(`${groupId}:${requiredClaim}`)) {
     throw new CustomAxiosError(`Forbidden`, { status: Forbidden, data: { tableName, id, user, groupId, createdBy }});
   }
-  return result;
+  return decryptItem(result, user);
 }
 
 export async function createData(tableName: string, itemData: Item, user: User): Promise<Item> {
@@ -62,18 +65,21 @@ export async function createData(tableName: string, itemData: Item, user: User):
   const { userId } = user;
   const payload = cleanInput(itemData);
   const item = { id, createdBy: userId, tags: cleanTags(tags), payload };
-  return await dynamo.createItem(tableName, item);
+  const encItem = await encryptItem(item, user);
+  return await dynamo.createItem(tableName, encItem);
 }
 
 export async function updateData(tableName: string, itemData: Partial<Item>, user: User): Promise<Item> {
   const { id, tags } = itemData;
   if (!id) throw new Error(`Cannot update ${tableName} without required properties: id`);
   const existing = await getData(tableName, id, user, 'write');
-  const { tags: existingTags, payload: existingPayload } = existing;
+  const { tags: existingTags } = existing;
   const updatedTags = existingTags ? [existingTags, tags].join(',') : tags;
+  const existingPayload = (await decryptItem(existing, user)).payload;
   const payload = { ...existingPayload, ...cleanInput(itemData) };
   const item = { id, updatedBy: user.userId, tags: cleanTags(updatedTags), payload };
-  return dynamo.updateItem(tableName, item);
+  const encItem = await encryptItem(item, user);
+  return dynamo.updateItem(tableName, encItem);
 }
 
 export async function deleteData(tableName: string, id: string, user: User): Promise<void> {
