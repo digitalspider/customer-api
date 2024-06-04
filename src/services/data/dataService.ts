@@ -62,24 +62,24 @@ export async function getData(tableName: string, id: string, user: User, require
 }
 
 export async function createData(tableName: string, itemData: Item, user: User): Promise<Item> {
-  const { id = uuidv4(), tags } = itemData;
+  const { id = uuidv4(), tags, groupId, shareWith } = itemData;
   const { userId } = user;
   const payload = cleanInput(itemData);
-  const item = { id, createdBy: userId, tags: cleanTags(tags), payload };
+  const item = { id, createdBy: userId, tags: cleanTags(tags), groupId, shareWith, payload };
   const encItem = await encryptItem(item, user);
   await dynamo.createItem(tableName, encItem);
   return getData(tableName, id, user);
 }
 
 export async function updateData(tableName: string, itemData: Partial<Item>, user: User): Promise<Item> {
-  const { id, tags } = itemData;
+  const { id, groupId, shareWith, tags } = itemData;
   if (!id) throw new Error(`Cannot update ${tableName} without required properties: id`);
   const existing = await getData(tableName, id, user, 'write');
   const { tags: existingTags } = existing;
   const updatedTags = existingTags ? [existingTags, tags].join(',') : tags;
   const existingPayload = (await decryptItem(existing, user)).payload;
   const payload = { ...existingPayload, ...cleanInput(itemData) };
-  const item = { id, updatedBy: user.userId, tags: cleanTags(updatedTags), payload };
+  const item = { id, updatedBy: user.userId, groupId, shareWith, tags: cleanTags(updatedTags), payload };
   const encItem = await encryptItem(item, user);
   await dynamo.updateItem(tableName, encItem);
   return getData(tableName, id, user);
@@ -93,6 +93,6 @@ export async function deleteData(tableName: string, id: string, user: User): Pro
 }
 
 function cleanInput(input: Partial<Item>): Partial<Omit<Item, 'createdBy' | 'id'>> {
-  const { id, groupId, createdBy, createdAt, updatedBy, updatedAt, deletedBy, deletedAt, tags, ...validInput } = input; // eslint-disable-line
+  const { id, groupId, shareWith, createdBy, createdAt, updatedBy, updatedAt, deletedBy, deletedAt, tags, ...validInput } = input; // eslint-disable-line
   return validInput;
 }

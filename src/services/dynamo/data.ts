@@ -13,6 +13,7 @@ export type AuditData = {
 };
 export type Item = AuditData & DataKey & {
   groupId?: string;
+  shareWith?: string;
   tags?: string;
   payload?: any;
   encPayload?: string;
