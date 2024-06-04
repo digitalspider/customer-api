@@ -37,7 +37,8 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
         data = await verifyToken(jwtToken);
         break;
       case POST:
-        switch(pathFirst) {
+        if (pathParts.length<=1) throw new CustomAxiosError(`Invalid path ${path}. Required additional path context`, { status: BadRequest })
+        switch(pathParts[1]) {
           case 'login': {
             const { username, password, expiryInSec } = body as Auth;
             const { password: ignore, ...safeBody } = body;
