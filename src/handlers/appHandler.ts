@@ -19,6 +19,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
   const { authorizer } = requestContext || {};
   const { tenantId, username, userId, claims: claimsInput = '', publicKey, privateKey } = authorizer || {};
   const user: User = { tenantId, username, userId, claims: claimsInput.trim().split(','), publicKey, privateKey };
+  const { publicKey: x, privateKey: y, ...safeToPrintUser } = user;
   const { uuid: objectId, objectType } = pathParameters || {};
   const body = bodyString ? JSON.parse(bodyString) : undefined;
   const { pathParts, pathFirst = '' } = parsePath(path, objectType);
@@ -28,7 +29,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
     httpMethod,
     path,
     awsRequestId,
-    user,
+    user: safeToPrintUser,
     objectId,
     objectType,
     tableName,
@@ -77,6 +78,7 @@ export async function handleEvent(event: APIGatewayProxyEvent, context: Context)
       httpMethod,
       path,
       awsRequestId,
+      user: safeToPrintUser,
       data,
       url,
       errorStatus,
