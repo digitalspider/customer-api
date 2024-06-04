@@ -2,10 +2,10 @@ import { APIGatewayProxyEvent, APIGatewayProxyEventHeaders, APIGatewayProxyResul
 import { HttpStatusCode } from 'axios';
 import { JwtPayload } from 'jsonwebtoken';
 import { HTTP_METHOD } from '../common/constants';
-import { createItem, createJwt, extractToken, getItemByUsername, mapAuthToToken, verifyToken } from '../services/authService';
+import { createItem, createJwt, extractToken, getItemByUsername, mapAuthToToken, verifyToken } from '../services/auth/authService';
 import { createRSAKeyPair, hash } from '../services/crypto/cryptoService';
 import { updateItem } from '../services/dynamo/auth';
-import { createResponse, parsePath } from '../services/utils';
+import { createResponse, parsePath } from '../services/utils/utils';
 import { Auth, LoginInput } from '../types/auth';
 import { CustomAxiosError } from '../types/error';
 

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { User } from '../../types/auth';
 import { CustomAxiosError } from '../../types/error';
 import * as dynamo from '../dynamo/data';
-import { cleanTags } from '../utils';
+import { cleanTags } from '../utils/utils';
 import { decryptItem, decryptList, encryptItem } from './cryptoDataService';
 
 const { NotFound, Forbidden } = HttpStatusCode;

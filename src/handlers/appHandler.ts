@@ -1,3 +1,4 @@
+import { ResourceNotFoundException } from '@aws-sdk/client-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { HttpStatusCode } from 'axios';
 import { AWSENV, VALID_PATHS } from '../common/config';
@@ -5,10 +6,9 @@ import { HTTP_METHOD } from '../common/constants';
 import { createTable, describeTable } from '../services/aws/dynamoService';
 import { ListResults, createData, deleteData, getData, listData, updateData } from '../services/data/dataService';
 import { Item } from '../services/dynamo/data';
-import { createResponse, parsePath } from '../services/utils';
+import { createResponse, parsePath } from '../services/utils/utils';
 import { User } from '../types/auth';
 import { CustomAxiosError } from '../types/error';
-import { ResourceNotFoundException } from '@aws-sdk/client-dynamodb';
 
 const { Ok, MethodNotAllowed, InternalServerError, BadRequest, PreconditionFailed } = HttpStatusCode;
 const { GET, POST, PUT, DELETE } = HTTP_METHOD;

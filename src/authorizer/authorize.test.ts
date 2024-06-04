@@ -1,6 +1,6 @@
 import { APIGatewayRequestAuthorizerEvent } from "aws-lambda";
+import { extractToken, verifyToken } from '../services/auth/authService';
 import { handleEvent, updateResourceForCaching } from "./authorize";
-import { extractToken, verifyToken } from '../services/authService';
 
 jest.mock('../services/aws/secretService');
 // jest.mock('../services/authService');

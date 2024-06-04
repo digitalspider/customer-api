@@ -1,6 +1,6 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
 import { HttpStatusCode } from 'axios';
-import { CustomAxiosError } from '../types/error';
+import { CustomAxiosError } from '../../types/error';
 
 const { BadRequest } = HttpStatusCode;
 

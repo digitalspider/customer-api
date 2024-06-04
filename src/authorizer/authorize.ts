@@ -5,7 +5,7 @@ import {
   PolicyDocument,
 } from 'aws-lambda';
 import { JwtPayload } from 'jsonwebtoken';
-import { extractToken, verifyToken } from '../services/authService';
+import { extractToken, verifyToken } from '../services/auth/authService';
 import { getItem } from '../services/dynamo/auth';
 
 type Effect = 'Allow' | 'Deny';

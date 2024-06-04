@@ -1,5 +1,5 @@
 import { HttpStatusCode } from 'axios';
-import { CustomAxiosError } from '../types/error';
+import { CustomAxiosError } from '../../types/error';
 import { cleanTags, createResponse, groupSettledPromises, parsePath, sleep } from './utils';
 
 describe('Test utils', () => {

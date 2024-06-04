@@ -1,11 +1,11 @@
 import jwt, { JwtPayload, SignOptions, VerifyOptions } from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
-import { SECRET_MANAGER_NAME, URL_AUTH } from '../common/config';
-import { JWT_SECRET_NAME } from '../common/constants';
-import { Auth } from '../types/auth';
-import { getSecret } from './aws/secretService';
-import { hash } from './crypto/cryptoService';
-import * as dynamo from './dynamo/auth';
+import { SECRET_MANAGER_NAME, URL_AUTH } from '../../common/config';
+import { JWT_SECRET_NAME } from '../../common/constants';
+import { Auth } from '../../types/auth';
+import { getSecret } from '../aws/secretService';
+import { hash } from '../crypto/cryptoService';
+import * as dynamo from '../dynamo/auth';
 
 export function mapAuthToToken(authData: Auth): JwtPayload {
   const { userId, tenantId, context } = authData;
