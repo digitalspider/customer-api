@@ -7,7 +7,7 @@ on:
     int_tests:
       description: Run integration tests
       required: false
-      default: false
+      default: true
       type: boolean
 
 jobs:

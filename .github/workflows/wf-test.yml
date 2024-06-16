@@ -50,7 +50,7 @@ jobs:
         run: npm run test:${{ inputs.environment_name }}
 
       # Publish our packaged artifacts for consumption by our deployment
-      - uses: actions/upload-artifacts@v4
+      - uses: actions/upload-artifact@v4
         if: ${{ github.actor != 'dependabot[bot]' }}
         id: artifact-upload-step
         with:
