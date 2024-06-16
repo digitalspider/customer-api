@@ -4,40 +4,22 @@ on:
   push:
     branches: [develop]
   workflow_dispatch:
+    int_tests:
+      description: Run integration tests
+      required: false
+      default: false
+      type: boolean
 
 jobs:
-  server:
-    name: Deploy Server APIs
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: server
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@master
+  deploy:
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    uses: ./.github/workflows/wf-deploy.yml
+    with:
+      environment_name: dev
 
-      - name: Install-Test
-        run: |
-          yarn install --frozen-lockfile
-          yarn test
-
-      - name: Install SAM
-        uses: aws-actions/setup-sam@v2
-        with:
-          version: 1.72.0
-
-      - name: Build
-        run: yarn build
-
-      - name: Deploy Stack
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          AWS_ROLE: CIDeployAccess
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID_NONPROD }}
-          AWS_BUCKET_NAME: ds-customer-api-dev
-          AWSENV: dev
-        run: |
-          .deploy/aws-sam-deploy.sh samconfig-dev.toml
+  integration-tests:
+    if: ${{ github.actor != 'dependabot[bot]' && inputs.int_tests }}
+    uses: ./.github/workflows/wf-test.yml
+    needs: deploy
+    with:
+      environment_name: dev

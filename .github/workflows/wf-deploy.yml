@@ -1,0 +1,57 @@
+name: ~Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        description: Environment
+        required: false
+        default: dev
+        type: string
+  workflow_dispatch:
+    inputs:
+      environment_name:
+        description: Environment
+        required: false
+        default: dev
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+jobs:
+  deploy:
+    name: Deploy APIs
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+
+      - name: Install-Test
+        run: |
+          yarn install --frozen-lockfile
+          yarn test
+
+      - name: Install SAM
+        uses: aws-actions/setup-sam@v2
+
+      - name: Build
+        run: yarn build
+
+      - name: Deploy Stack
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_ROLE: CIDeployAccess
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID_PROD }}
+          AWS_BUCKET_NAME: ds-customer-api-${{ inputs.environment_name }}
+          AWSENV: ${{ inputs.environment_name }}
+        run: |
+          # .deploy/aws-sam-validate.sh samconfig-staging.toml # ERROR: 'AuthApi', "Unable to add Cors configuration because 'DefinitionBody' does not contain a valid Swagger definition."
+          .deploy/aws-sam-deploy.sh samconfig-${{ inputs.environment_name }}.toml

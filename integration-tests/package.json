@@ -1,0 +1,16 @@
+{
+  "name": "@ds/customer-api-integration-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for customer API",
+  "scripts": {
+    "test:dev": "newman run postman/customer-api.postman_collection.json --environment postman/CUSTOMER_API_DEV.postman_environment.json -r cli,json,junit,htmlextra --reporter-htmlextra-export newman/test-results.html",
+    "test:staging": "newman run postman/customer-api.postman_collection.json --environment postman/CUSTOMER_API_STAGING.postman_environment.json -r cli,json,junit,htmlextra --reporter-htmlextra-export newman/test-results.html",
+    "test:prod": "newman run postman/customer-api.postman_collection.json --environment postman/CUSTOMER_API_PROD.postman_environment.json -r cli,json,junit,htmlextra --reporter-htmlextra-export newman/test-results.html"
+  },
+  "devDependencies": {
+    "newman": "^6.1.1",
+    "newman-reporter-htmlextra": "^1.23.0"
+  },
+  "author": "David Vittor",
+  "license": "ISC"
+}

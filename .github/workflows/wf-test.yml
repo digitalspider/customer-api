@@ -1,0 +1,70 @@
+name: ~Test
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        description: Environment
+        required: false
+        default: dev
+        type: string
+  workflow_dispatch:
+    inputs:
+      environment_name:
+        description: Environment
+        required: false
+        default: dev
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment_name }}
+    if: ${{ github.actor != 'dependabot[bot]' }}
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: integration-tests
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initiate npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: https://npm.pkg.github.com/
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: NPM Install
+        run: npm ci
+      
+      - name: Integration tests
+        run: npm run test:${{ inputs.environment_name }}
+
+      # Publish our packaged artifacts for consumption by our deployment
+      - uses: actions/upload-artifacts@v4
+        if: ${{ github.actor != 'dependabot[bot]' }}
+        id: artifact-upload-step
+        with:
+          name: customer-api-test-results
+          path: integration-tests/newman/test-results.html
+      
+      - name: Test Summary
+        uses: test-summary/action@v2
+        with:
+          paths: "integration-tests/newman/*.xml"
+        if: always()
+
+      - name: Print test results to GitHub Job Summary
+        run: |
+          echo "## Integration test results" >> $GITHUB_STEP_SUMMARY
+          echo "[customer-api-test-results.zip](${{ steps.artifact-upload-step.outputs.artifact-url }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY

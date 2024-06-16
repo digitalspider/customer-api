@@ -5,6 +5,7 @@
 coverage
 env.json
 node_modules
+newman
 build
 # ignore log files
 logs
