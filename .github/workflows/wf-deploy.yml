@@ -8,7 +8,6 @@ on:
         required: false
         default: dev
         type: string
-    secrets: inherit
   workflow_dispatch:
     inputs:
       environment_name:

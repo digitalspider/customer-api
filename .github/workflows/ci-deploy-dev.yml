@@ -16,6 +16,7 @@ jobs:
     uses: ./.github/workflows/wf-deploy.yml
     with:
       environment_name: dev
+    secrets: inherit
 
   integration-tests:
     if: ${{ github.actor != 'dependabot[bot]' && inputs.int_tests }}

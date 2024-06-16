@@ -11,3 +11,4 @@ jobs:
     uses: ./.github/workflows/wf-deploy.yml
     with:
       environment_name: prod
+    secrets: inherit
