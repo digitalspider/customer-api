@@ -51,7 +51,7 @@ jobs:
 
       # Publish our packaged artifacts for consumption by our deployment
       - uses: actions/upload-artifact@v4
-        if: ${{ github.actor != 'dependabot[bot]' }}
+        if: always()
         id: artifact-upload-step
         with:
           name: customer-api-test-results
