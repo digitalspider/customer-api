@@ -1,12 +1,12 @@
 import { ResourceNotFoundException } from '@aws-sdk/client-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { HttpStatusCode } from 'axios';
-import { AWSENV, VALID_PATHS } from '../common/config';
+import { AWSENV, MAX_ARRAY_LIMIT, VALID_PATHS } from '../common/config';
 import { HTTP_METHOD } from '../common/constants';
 import { createTable, describeTable } from '../services/aws/dynamoService';
 import { ListResults, createData, deleteData, getData, listData, updateData } from '../services/data/dataService';
 import { Item } from '../services/dynamo/data';
-import { createResponse, parsePath } from '../services/utils/utils';
+import { createResponse, groupSettledPromises, parsePath } from '../services/utils/utils';
 import { User } from '../types/auth';
 import { CustomAxiosError } from '../types/error';
 
@@ -131,16 +131,58 @@ export async function handleGet(tableName: string, objectId: string, user: User)
   return result || {};
 }
 
-export async function handleCreate(tableName: string, customer: Item, user: User): Promise<Item> {
-  const result = await createData(tableName, customer, user);
-  return result || {};
+export async function handleCreate(tableName: string, customer: Item|Item[], user: User): Promise<Item|Item[]> {
+  if (!Array.isArray(customer)) {
+    const result = await createData(tableName, customer, user);
+    return result || {};
+  } else {
+    const { length: dataLength } = customer;
+    const maxLength = MAX_ARRAY_LIMIT;
+    if (dataLength > maxLength) throw new CustomAxiosError(`Max array limit exceeded. Expected: ${maxLength}`, { status: BadRequest, data: { dataLength, maxLength } });
+    const results = [] as Item[];
+    const promises = customer.map(async (customerItem) => {
+      const result = await createData(tableName, customerItem, user);
+      results.push(result);
+    });
+    const responses = await Promise.allSettled(promises);
+    const groupResults = groupSettledPromises(responses);
+    if (groupResults?.errors?.length) throw new CustomAxiosError(`Error processing data array. Length=${dataLength}`, { status: InternalServerError, data: { groupResults } });
+    return results || [];
+  }
 }
 
-export async function handleUpdate(tableName: string, customer: Partial<Item>, user: User): Promise<Item> {
-  const result = await updateData(tableName, customer, user);
-  return result || {};
+export async function handleUpdate(tableName: string, customer: Partial<Item>|Partial<Item>[], user: User): Promise<Item|Item[]> {
+  if (!Array.isArray(customer)) {
+    const result = await updateData(tableName, customer, user);
+    return result || {};
+  } else {
+    const { length: dataLength } = customer;
+    const maxLength = MAX_ARRAY_LIMIT;
+    if (dataLength > maxLength) throw new CustomAxiosError(`Max array limit exceeded. Expected: ${maxLength}`, { status: BadRequest, data: { dataLength, maxLength } });
+    const results = [] as Item[];
+    const promises = customer.map(async (customerItem) => {
+      const result = await updateData(tableName, customerItem, user);
+      results.push(result);
+    });
+    const responses = await Promise.allSettled(promises);
+    const groupResults = groupSettledPromises(responses);
+    if (groupResults?.errors?.length) throw new CustomAxiosError(`Error processing data array. Length=${dataLength}`, { status: InternalServerError, data: { groupResults } });
+    return results || [];
+  }
 }
 
-export async function handleDelete(tableName: string, id: string, user: User): Promise<void> {
-  await deleteData(tableName, id, user);
+export async function handleDelete(tableName: string, id: string|string[], user: User): Promise<void> {
+  if (!Array.isArray(id)) {
+    await deleteData(tableName, id, user);
+  } else {
+    const { length: dataLength } = id;
+    const maxLength = MAX_ARRAY_LIMIT;
+    if (dataLength > maxLength) throw new CustomAxiosError(`Max array limit exceeded. Expected: ${maxLength}`, { status: BadRequest, data: { dataLength, maxLength } });
+    const promises = id.map(async (idItem) => {
+      await deleteData(tableName, idItem, user);
+    });
+    const responses = await Promise.allSettled(promises);
+    const groupResults = groupSettledPromises(responses);
+    if (groupResults?.errors?.length) throw new CustomAxiosError(`Error processing data array. Length=${dataLength}`, { status: InternalServerError, data: { groupResults } });
+  }
 }

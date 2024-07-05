@@ -51,10 +51,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/customerCreate'
+              oneOf:
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/customerCreate'
+                - $ref: '#/components/schemas/customerCreate'
+
       responses:
         200:
           description: success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/customer'
+                  - $ref: '#/components/schemas/customer'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -216,10 +229,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/customerCreate'
+              oneOf:
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/customerCreate'
+                - $ref: '#/components/schemas/customerCreate'
+
       responses:
         200:
           description: success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/customer'
+                  - $ref: '#/components/schemas/customer'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -382,10 +408,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/customerCreate'
+              oneOf:
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/customerCreate'
+                - $ref: '#/components/schemas/customerCreate'
+
       responses:
         200:
           description: success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/customer'
+                  - $ref: '#/components/schemas/customer'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -548,10 +587,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/customerCreate'
+              oneOf:
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/customerCreate'
+                - $ref: '#/components/schemas/customerCreate'
+
       responses:
         200:
           description: success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/customer'
+                  - $ref: '#/components/schemas/customer'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -721,10 +773,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/customerCreate'
+              oneOf:
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/customerCreate'
+                - $ref: '#/components/schemas/customerCreate'
+
       responses:
         200:
           description: success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/customer'
+                  - $ref: '#/components/schemas/customer'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
